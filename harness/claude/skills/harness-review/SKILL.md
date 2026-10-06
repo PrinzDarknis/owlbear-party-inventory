@@ -15,6 +15,6 @@ Check every changed file for:
 2. **SDK pitfalls:** `obrReady`/`sceneReady` awaited; builders used only after ready and with an explicit `.layer()`; menus and tools registered in the background; one listener per channel per iframe; `updateItems` by ids touching only your own metadata key; hidden items (`visible: false`) not exposed to players; unsubscribe returned and called; no write loops (a guard exists for listeners that write); partial metadata writes; size budget considered; Dates parsed after reading; debounced saves awaited correctly.
 3. **Security/privacy:** the checklist in `05-security.md` (validation of metadata/broadcast/imports, no `as` on untrusted data, no raw HTML, no secrets, no personal data in logs or fixtures, dependencies).
 4. **Conventions:** file naming and suffixes, named exports and barrels, function components and hooks for new code, CSS naming and theme variables, English identifiers.
-5. **Docs:** new keys/channels documented in `harness/project/data-model.md`; new debt in `known-issues.md`.
+5. **Docs:** new keys/channels documented in `harness/project/data-model.md`; new debt in `known-issues.md`; on a feature branch `harness/project/current-feature/plan.md` and `status.md` are up to date (on the default branch the folder is empty).
 
 Output: findings grouped by severity (**blocker / should fix / nit**), each with `file:line`, the rule (doc + section) and a concrete fix. Say explicitly if nothing was found. Do not edit files unless the user asks.

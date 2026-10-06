@@ -26,6 +26,7 @@ Commands are for **Git Bash** (comes with Git for Windows) or any POSIX shell.
   rm -r harness/project
   mkdir harness/project
   cp harness/templates/project/*.md harness/project/
+  mkdir harness/project/current-feature && touch harness/project/current-feature/.gitkeep
   ```
 
 ## 3. Copy the base files from the templates

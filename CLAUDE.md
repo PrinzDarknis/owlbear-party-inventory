@@ -17,3 +17,4 @@ Quick commands: `npm run dev` · `npm run lint` · `npm run build` · deploy onl
 @harness/core/06-build-release.md
 @harness/core/07-workflow.md
 @harness/project/README.md
+@harness/project/roadmap.md

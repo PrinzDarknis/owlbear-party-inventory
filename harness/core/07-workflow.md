@@ -1,11 +1,24 @@
 # 07 – Working Agreement for Claude
 
 ## Before starting a task
+0. **Check `harness/project/current-feature/`.** If it contains files, a feature is in progress: read `plan.md` and `status.md` first and continue from there (also check `git branch --show-current`).
 1. Read `harness/project/README.md` and the project files relevant to the task (data model, deviations, known issues).
 2. **Project rules override core rules** only where `harness/project/deviations.md` says so explicitly. Everything else follows `harness/core/`.
 3. In legacy code that deviates, match the surrounding style for small changes. For new modules or files, follow core. Do not mix both styles within one file.
 4. For anything touching persisted data, check `harness/project/data-model.md` first. Never change a key or format without a migration.
 5. For any SDK feature, look it up in [`harness/owlbear/`](../owlbear/README.md) (index → topic page → recipe) before writing code. If a page is missing or contradicts the installed `.d.ts`, say so and update the page.
+
+## Feature lifecycle (`harness/project/current-feature/`)
+A feature branch carries **one complete feature**, including all of its steps. Its plan and progress live in `harness/project/current-feature/` while the branch exists, so work can resume in a new session at any time. On the default branch (`main`/`master`) the folder is **empty** (only `.gitkeep`).
+
+1. **Start:** create the branch `feature/<slug>` from the up-to-date default branch. Write `current-feature/plan.md` from the template (`harness/templates/project/current-feature/`) together with the user: goal, scope, decisions, and a step-by-step checklist. A large step may get its own sub-plan `current-feature/step-<n>-<slug>.md`. Get the user's approval before implementing.
+2. **During the work:** after each step (and before ending a session) update the checklist in `plan.md` and **overwrite** `status.md` with the current state: current step, what was done last, next action, open questions, blockers. Decisions made on the way go into `plan.md` → Decisions. `status.md` is a snapshot, not a log: never append history.
+3. **Keep it small:** no logs, no dated session notes, no copies of code or diffs. Remove sub-plans of finished steps once their outcome is in `plan.md`. Git history holds the past.
+4. **Finish:** a feature is done when every checklist item in `plan.md` is checked and the definition of done below is met. Then
+   - move lasting knowledge into the permanent docs (`data-model.md`, `overview.md`, `deviations.md`, `known-issues.md`, the project roadmap if there is one),
+   - empty `current-feature/` (keep `.gitkeep`) in a final commit, e.g. `docs(harness): close feature <slug>`,
+   - merge into the default branch only after asking the user.
+5. Only one feature is active per branch. Unrelated work gets its own branch, so features don't mix intermediate states.
 
 ## While working
 - Keep changes minimal and focused. No drive-by refactors outside the task. Note them in `harness/project/known-issues.md` instead.
@@ -24,6 +37,7 @@
 - [ ] Multi-user behavior considered: GM vs player, two clients, no write loops, late joiners.
 - [ ] Security checklist from [05](05-security.md#review-checklist-used-by-harness-review) passed.
 - [ ] `harness/project/*` updated (new keys/channels in `data-model.md`, new debt in `known-issues.md`, fixed issues removed).
+- [ ] `current-feature/plan.md` checklist and `status.md` reflect the current state.
 - [ ] A live test checklist was handed to the user (see below). The task is reported as *verified in Owlbear* only after the user confirms it.
 
 ## Live testing in Owlbear (user only)

@@ -10,3 +10,4 @@ When starting a new plugin, replace this folder with the skeletons from `harness
 | [data-model.md](data-model.md) | Metadata keys, broadcast channels, storage keys, migrations, foreign adapters |
 | [deviations.md](deviations.md) | Where this project intentionally differs from core |
 | [known-issues.md](known-issues.md) | Bugs, tech debt, TODOs |
+| [current-feature/](current-feature/) | Plan and status of the feature in progress; empty on the default branch (`harness/core/07-workflow.md` §Feature lifecycle) |

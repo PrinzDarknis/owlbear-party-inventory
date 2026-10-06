@@ -35,6 +35,7 @@ Copy-ready starting points. They use neutral placeholders (`com.example.my-plugi
 | `config/version-update.mjs` | `./` | Cross-platform SemVer bump |
 | `config/index.css` | `src/index.css` | Global CSS variables |
 | `project/*.md` | `harness/project/` | Empty skeletons for the project-specific docs |
+| `project/current-feature/` | `harness/project/current-feature/` (only on a feature branch) | `plan.md` + `status.md` for the feature in progress (`core/07-workflow.md` §Feature lifecycle) |
 
 Setup order and commands: [`harness/NEW-PLUGIN.md`](../NEW-PLUGIN.md). Note: a fresh `npm create vite` scaffold is **not** used, because current Vite templates ship oxlint, TypeScript 6 and Vite 8, which deviate from the harness stack.
 

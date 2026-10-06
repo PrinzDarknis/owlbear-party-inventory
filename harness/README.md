@@ -24,6 +24,7 @@ harness/
   scripts/
     sync-claude.mjs         mirrors harness/claude → .claude
   project/           PROJECT-SPECIFIC knowledge, the only folder that changes per plugin
+    current-feature/        plan + status of the feature in progress (empty on the default branch)
 ```
 
 ## Precedence

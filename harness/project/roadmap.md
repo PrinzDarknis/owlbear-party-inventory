@@ -1,6 +1,16 @@
 # Roadmap
 
-Agreed rough plan (2026-10-06). Details are planned at the start of each phase. One feature branch per phase; commits only after asking.
+Agreed rough plan (2026-10-06): the product-level view. Each phase is one feature with its own branch; its detailed plan and progress live in [current-feature/](current-feature/) while the branch exists (`harness/core/07-workflow.md` §Feature lifecycle). This file only records which phases are done and what comes next.
+
+## Current status and next step
+- **Done:** phase 0 and phase 1. Check `git branch` / `git log` whether `feature/model` is merged to `master` yet.
+- **Next:** phase 2 (storage). Create `feature/storage`, then write `current-feature/plan.md` with the user (approval before implementing).
+- **Open question for phase 2:** the data format at the storage boundary. Per `harness/core/04-conventions.md` §Models the default is to pass class instances (`Item`, `ItemInstance`, `Character`) and let each backend call `serialize()` / `deserialize()`; passing DTOs needs a real reason (then the DTO export must be justified).
+
+## Working mode
+- Feature lifecycle, plan and status files: `harness/core/07-workflow.md` §Feature lifecycle. When a phase is finished, mark it **Done** below and update "Current status and next step".
+- Format new or changed files with `npx prettier --write <paths>` (Prettier defaults, see `harness/core/01-tech-stack.md`).
+- Generic rules the user gives (naming, structure, style) go into `harness/core/`, project facts into `harness/project/`.
 
 ## Decisions
 | Topic | Decision |
@@ -28,7 +38,7 @@ components → hooks → manager → storage (interface) → storage/local | sto
 
 ## Phases
 0. Harness docs, remove template example code. **Done.**
-1. Model + Vitest (parsers, accessors). **Done.**
+1. Model + Vitest (classes with accessors, `serialize`/`deserialize`, limits, normalization). **Done.**
 2. Storage interface, local + memory backends, registry, tests.
 3. Manager (CRUD, assign/move, cycle check, rights, tree, weight, subscriptions), tests against the memory backend.
 4. UI in the standalone tab with the local backend: start dialog, design tokens, tabs, recursive inventory, details, GM catalog/editor/assign, character management, "view as player". Decide popover size and Playwright for click tests.

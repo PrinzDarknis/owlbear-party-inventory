@@ -107,6 +107,7 @@ Naming: plain types are **parsed** (`parse<Name>(value: unknown)`), class object
 - Every feature that adds metadata keys, broadcast channels or storage keys updates `harness/project/data-model.md`.
 
 ## Git
-- Branch per feature or fix: `feature/<slug>`, `fix/<slug>`, `chore/<slug>`. `main` stays deployable.
+- Branch per feature or fix: `feature/<slug>`, `fix/<slug>`, `chore/<slug>`. The default branch (`main`/`master`) stays deployable.
+- A feature branch holds a **complete feature** with all its steps; it is merged only when the feature is finished and `harness/project/current-feature/` is empty again (see [07 §Feature lifecycle](07-workflow.md#feature-lifecycle-harnessprojectcurrent-feature)).
 - Commit messages: `type(scope): summary` (Conventional Commits). Types: `feat`, `fix`, `refactor`, `style`, `docs`, `chore`, `build`. Imperative, lowercase summary, ≤ 72 chars.
 - Version bump commits: `chore(release): vX.Y.Z`.
