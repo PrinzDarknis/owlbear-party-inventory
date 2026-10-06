@@ -1,6 +1,4 @@
 // Components and hooks import from here, never from the SDK.
-import { exampleService } from "./obr-example.service";
-import { menuService } from "./obr-menu.service";
 import { sessionService } from "./obr-session.service";
 import { isGM, obrReady, sceneReady } from "./obr";
 
@@ -14,6 +12,4 @@ export const api = {
   sceneReady,
   isGM,
   session: sessionService,
-  menu: menuService,
-  example: exampleService,
 };

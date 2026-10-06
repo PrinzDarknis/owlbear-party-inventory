@@ -1,12 +1,13 @@
-# Project: <Plugin Name>
+# Project: Party Inventory
 
 Project-specific knowledge for this plugin. **Everything here overrides nothing in `harness/core` unless `deviations.md` says so.**
-When starting a new plugin, replace this folder with the skeletons from `harness/templates/project/` and run `/harness-onboard`.
 
 | File | Content |
 | --- | --- |
 | [overview.md](overview.md) | Purpose, features, roles, scripts |
+| [roadmap.md](roadmap.md) | Agreed architecture, decisions and phase plan |
+| [design.md](design.md) | Visual design rules and CSS tokens |
 | [entries-and-deploy.md](entries-and-deploy.md) | Iframe contexts, manifest, hosting path, release specifics |
-| [data-model.md](data-model.md) | Metadata keys, broadcast channels, storage keys, migrations, foreign adapters |
+| [data-model.md](data-model.md) | Domain model, metadata keys, broadcast channels, storage keys, migrations |
 | [deviations.md](deviations.md) | Where this project intentionally differs from core |
 | [known-issues.md](known-issues.md) | Bugs, tech debt, TODOs |

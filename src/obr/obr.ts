@@ -12,7 +12,7 @@ export const obrReady: Promise<void> = new Promise((resolve) => {
     try {
       await runMigrations();
     } catch (error) {
-      console.error("[plugin] migration failed", error);
+      console.error("[party-inventory] migration failed", error);
     }
     resolve();
   });
