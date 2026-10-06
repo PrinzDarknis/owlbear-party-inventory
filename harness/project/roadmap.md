@@ -17,10 +17,10 @@ Agreed rough plan (2026-10-06). Details are planned at the start of each phase. 
 ## Architecture
 ```
 components → hooks → manager → storage (interface) → storage/local | storage/memory | obr (ObrStorage)
-                         ↘ model (classes, DTOs, parsers) ↙
+                         ↘ model (classes with serialize/deserialize) ↙
 ```
-- `src/model/`: `Item`, `ItemInstance`, `Character`, `ItemLocation`, rarity enum; DTOs and parsers with size limits.
-- `src/storage/`: `InventoryStorage` interface (DTO CRUD for items, instances and characters, `loadTexts/saveTexts`, `subscribe`, `getRole`, `capabilities`), storage registry `{ id, label, isAvailable(), create() }`, local and memory backends.
+- `src/model/`: classes `Item`, `ItemInstance`, `Character` (with `serialize`, `static deserialize`), plain types `ItemLocation` and `Rarity`; size limits.
+- `src/storage/`: `InventoryStorage` interface (CRUD for items, instances and characters; exact data format at the boundary decided in phase 2, `loadTexts/saveTexts`, `subscribe`, `getRole`, `capabilities`), storage registry `{ id, label, isAvailable(), create() }`, local and memory backends.
 - `src/obr/obr-inventory.storage.ts`: Owlbear backend, loaded via dynamic `import()`.
 - `src/manager/inventory-manager.ts`: CRUD, `assignItem` (creates an instance), `moveInstance` with cycle and `hasInventory` checks, role-based rules, tree building, derived values (total weight, instance count), `update…(id, fn)` on clones, a version counter for `useSyncExternalStore`.
 - `src/hooks/`: `useInventoryManager`, `useCharacters`, `useItems`, `useInstancesAt`, `useInstance`, `useTexts`.
@@ -28,7 +28,7 @@ components → hooks → manager → storage (interface) → storage/local | sto
 
 ## Phases
 0. Harness docs, remove template example code. **Done.**
-1. Model + Vitest (parsers, accessors).
+1. Model + Vitest (parsers, accessors). **Done.**
 2. Storage interface, local + memory backends, registry, tests.
 3. Manager (CRUD, assign/move, cycle check, rights, tree, weight, subscriptions), tests against the memory backend.
 4. UI in the standalone tab with the local backend: start dialog, design tokens, tabs, recursive inventory, details, GM catalog/editor/assign, character management, "view as player". Decide popover size and Playwright for click tests.

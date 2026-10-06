@@ -19,11 +19,13 @@ Open `harness/owlbear/README.md` and read the topic pages for every SDK API the 
 - Check `harness/project/data-model.md` for existing keys and do not collide or duplicate.
 
 ## 2. Implement (copy patterns from `harness/templates/`)
-1. `src/model/<domain>/`: `<domain>.types.ts` (ISO strings for dates), `<domain>.parse.ts` (type guard/parser with defaults, length limits), `index.ts`.
+1. `src/model/<domain>/` (see `harness/core/04-conventions.md` §Models):
+   - plain type: `<domain>.types.ts` (ISO strings for dates), `<domain>.parse.ts` (type guard/parser with defaults, length limits), `index.ts`;
+   - class: `<domain>.ts` that `implements` the DTO interface, with `serialize()` and `static deserialize(value: unknown)` (nothing else for conversion); `<domain>.types.ts` for the DTO, not exported from `index.ts` unless really needed. No separate parser.
 2. `src/obr/constants.ts`: new key/channel constants under the plugin namespace.
 3. `src/obr/obr-<domain>.service.ts` (from `obr-example.service.ts`):
    - every method awaits `obrReady` (and `sceneReady()` for scene/items),
-   - reads go through the parser,
+   - reads go through the parser (or `<Class>.deserialize`),
    - writes are partial, debounced if high-frequency, and size-checked,
    - `subscribe`/`on*` return the unsubscribe function,
    - broadcast payloads are validated against an allowlist.

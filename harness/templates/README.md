@@ -17,7 +17,7 @@ Copy-ready starting points. They use neutral placeholders (`com.example.my-plugi
 | `obr/obr-menu.service.ts` | `src/obr/` | Context-menu registration |
 | `obr/obr-example.service.ts` | `src/obr/obr-<domain>.service.ts` | Domain service: validated load/save/subscribe, size budget, broadcast allowlist, item loop guard |
 | `obr/migrations/index.ts` | `src/obr/migrations/` | Versioned, GM-only, idempotent migrations |
-| `model/example/` | `src/model/<domain>/` | Types + parser/type guard for untrusted data |
+| `model/example/` | `src/model/<domain>/` | Plain-type model: types + parser/type guard for untrusted data (for class models see `core/04-conventions.md` §Models) |
 | `utils/debounce.service.ts` | `src/utils/` | Keyed debounce whose promise resolves after the write |
 | `entries/entry.html` | `html/popover.html` (or `html/<context>.html`) | HTML entry for a UI iframe |
 | `entries/background.html` | `html/background.html` | HTML entry for the background page |

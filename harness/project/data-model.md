@@ -2,15 +2,20 @@
 
 Namespace constant: `PLUGIN_ID` in `src/obr/constants.ts`.
 
-## Domain model (planned, see [roadmap.md](roadmap.md))
-| Entity | Fields | Notes |
+## Domain model (`src/model/`)
+| Entity (class / DTO) | Fields | Notes |
 | --- | --- | --- |
-| `Item` (definition) | `id`, `name` (required), `description?`, `categories[]`, `rarity?`, `value?` (GP), `weight?`, `stackable`, `hasInventory`, `dmNotes?` | Created once by the GM in the catalog. |
-| `ItemInstance` | `id`, `itemId`, `location`, `alias?`, `notes?` (player notes), `quantity` | One copy owned by a character or inside a container. `quantity` is only meaningful if the item is `stackable`, otherwise 1. |
-| `Character` | `id`, `name` | One tab each. No Owlbear player names or ids are stored. |
-| `ItemLocation` | `unassigned` \| `{ character: id }` \| `{ instance: id }` | Data is flat; the tree is built in the manager. `{ instance }` requires the target's item to have `hasInventory`, and must not create a cycle. |
+| `Item` / `ItemData` (definition) | `id`, `name` (required), `description?`, `categories?` (string[]), `rarity?`, `valueCp?` (copper pieces, integer), `weight?` (lb, 2 decimals), `stackable`, `hasInventory`, `dmNotes?` | Created once by the GM in the catalog. |
+| `ItemInstance` / `ItemInstanceData` | `id`, `itemId`, `location`, `alias?`, `notes?` (player notes), `quantity` (integer ≥ 0) | One copy owned by a character or inside a container. The getter `quantity` returns 1 for non-stackable items (stored value stays as `rawQuantity`). The manager binds the definition via `bindItem`. |
+| `Character` / `CharacterData` | `id`, `name` | One tab each. No Owlbear player names or ids are stored. |
+| `ItemLocation` | `{ type: "unassigned" }` \| `{ type: "character", characterId }` \| `{ type: "instance", instanceId }` | Data is flat; the tree is built in the manager. `instance` requires the target's item to have `hasInventory` and must not create a cycle (manager, phase 3). |
+| `Rarity` | `common`, `uncommon`, `rare`, `very-rare`, `legendary`, `artifact` (`RARITIES`) | `undefined` = no rarity. |
 
-Domain classes expose every value via get/set accessors (extension point, e.g. unidentified items). Storage only sees plain JSON DTOs.
+Rules:
+- Domain classes `implement` their DTO interface and expose every value via get/set accessors (extension point, e.g. unidentified items). `serialize()` reads private fields, so getter overrides never reach storage. Subclasses override get and set together.
+- **Setters correct silently** (trim, truncate, clamp, round). Empty required text or non-finite numbers keep the previous value; `undefined` or empty text clears optional fields. Shared rules: `src/model/common/normalize.service.ts`.
+- Limits: `src/model/common/limits.constant.ts`. Texts per item stay below the 16 KB broadcast limit.
+- Untrusted JSON is validated by `Item.deserialize`, `ItemInstance.deserialize`, `Character.deserialize` (class models; always `unknown` in, no separate parser) and `parseLocation` (plain type): `undefined` without a valid id (≤ `ID_MAX`) or required name, fields of the wrong type dropped, the rest normalized. DTO interfaces are not exported from the model barrels (`harness/core/04-conventions.md` §Models).
 
 ## Room metadata
 | Key (constant) | Shape (type) | Written by | Notes |

@@ -29,7 +29,7 @@ src/
     constants.ts          namespace, metadata keys, broadcast channels, URL prefix
     adapters/<ext>/       read/write metadata owned by OTHER extensions
     migrations/<semver>/  data migrations, run once after OBR is ready
-  model/                  types, defaults, parsers/type guards (no SDK, no React)
+  model/                  types or domain classes, defaults, parsers/type guards (no SDK, no React)
   utils/                  pure helpers (no SDK, no React)
 ```
 Dependency direction: `components → hooks → obr → model/utils`. `model` and `utils` depend on nothing in the app. Components **never** import `@owlbear-rodeo/sdk` directly. The only exception is pure SDK *types* used in props, and even those should be re-exported from `src/obr`.

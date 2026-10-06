@@ -23,9 +23,10 @@ src/
   hooks/use-<name>.hook.ts
   obr/                                  SDK facade (see 02-architecture)
   model/<domain>/
-    <name>.types.ts                     types/interfaces
+    <name>.ts                           domain class (optional, see "Models" below)
+    <name>.types.ts                     types/interfaces (with a class: the JSON DTO)
     <name>.default.ts                   default values
-    <name>.parse.ts                     type guards / parsers for untrusted data
+    <name>.parse.ts                     type guards / parsers for untrusted data (only without a class)
   utils/<name>.service.ts               one pure function (or tightly related group) per file
 ```
 
@@ -41,6 +42,35 @@ src/
 - Constants: `SCREAMING_SNAKE_CASE`. Functions and variables: `camelCase`. Components, types and classes: `PascalCase`. Hooks: `useXxx`.
 - No `any`. Use `unknown` plus a type guard. No non-null `!` except for `document.getElementById("root")!` in entries.
 - Relative imports, ordered: external packages → blank line → CSS import → blank line → assets → blank line → internal modules (farther first).
+- **Class internals use ECMAScript private fields** (`#name`), not TypeScript `private _name`. `#` fields are private at runtime too: they can't be reached via casts or bracket access, and they don't appear in `JSON.stringify`, `Object.keys` or spread, so data leaves an object only through its accessors and `serialize()`. Subclasses go through the accessors (`super.name`); if a subclass really needs raw access, expose a `protected` accessor instead of a `protected _field`. The same applies to private methods (`#helper()`).
+- **Member order in classes** (logical, top to bottom):
+  1. static constants and static fields,
+  2. instance fields (private `#fields` first),
+  3. constructor, then static factories (`create…`),
+  4. accessors (get/set pairs together, in the order of the fields or the DTO),
+  5. public methods, grouped by topic (related methods next to each other),
+  6. serialization: `serialize`, `static deserialize`, `clone`,
+  7. private helper methods (`#helper()`).
+- **Region comments** group the members of every class that has several of the groups above: `// #region <Name>` … `// #endregion` (e.g. `Fields`, `Accessors`, `<topic>`, `Serialization`, `Helpers`). Rules:
+  - The order above applies to all classes, small ones included.
+  - Once a class uses regions, **every member is in a region**. A group with a single member that sits between other regions gets its own region too (e.g. `Construction` for a lone constructor); loose members between regions break the IDE folding view.
+  - Constructor and factories form the `Construction` region between `Fields` and `Accessors`.
+  - Regions are only for IDE folding and readability; they don't nest and don't replace splitting a class that has grown too large.
+- A class that corresponds to an interface **always declares it with `implements`** (`class Item implements ItemData`), so the compiler keeps both in sync. Fields that the class only exposes read-only are `readonly` in the interface.
+
+## Models
+A model is either a **plain type** (interface/type plus a parser) or a **class** (with a JSON DTO interface). Choose the class when the model has behavior, invariants or accessors; otherwise keep the plain type.
+
+Naming: plain types are **parsed** (`parse<Name>(value: unknown)`), class objects are **serialized** (`serialize()` / `static deserialize(value: unknown)`).
+
+- **Plain type:** `<name>.types.ts` plus `<name>.parse.ts` with `parse<Name>(value: unknown): <Name>` (falling back to defaults) or a type guard `is<Name>(value: unknown)`. Both are exported from `index.ts`.
+- **Class:** the class is the model and `implements` its DTO interface. Everything outside the model folder works with class instances.
+  - Exactly one pair of methods converts to and from JSON:
+    - `serialize(): <Name>Data` returns the plain DTO. It reads the private fields, so getter overrides in subclasses never reach storage.
+    - `static deserialize(value: unknown): <Class> | undefined` **always takes `unknown`** and validates and normalizes. It returns `undefined` if required fields are missing.
+  - There are no other conversion paths: **no separate `.parse.ts`**, no parser that returns the DTO, no typed `fromData`/`parse` next to `deserialize`. Tests use a small local helper that throws if `deserialize` returns `undefined`. `clone()` copies the private fields directly.
+  - The DTO interface (`<name>.types.ts`) is **not exported from `index.ts` by default**. Export it only when a place really needs the plain shape and can't use the class. Name the reason in a comment at the export.
+  - Storage, sync and import code hand raw data to `<Class>.deserialize` and write `instance.serialize()`.
 
 ## React
 - **Function components + hooks only.** Template: [`templates/component`](../templates/component/).

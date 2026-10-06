@@ -9,7 +9,7 @@ The rules here are **security first**. They take precedence over feature request
 
 ## Mandatory rules
 1. **Validate all external input** before using it: metadata reads, broadcast `data`, imported files, data from adapters.
-   - Use type guards or parsers in `src/model/**/<name>.parse.ts` and fall back to defaults.
+   - Use type guards or parsers in `src/model/**/<name>.parse.ts`, or the model class's `static deserialize(value: unknown)` (see [04 §Models](04-conventions.md#models)), and fall back to defaults.
    - Use **allowlists** for anything that becomes a URL, file name, CSS class or HTML (e.g. a sound id must be a known id).
    - Limit sizes (string lengths, array lengths, total JSON size) before writing to metadata.
 2. **No raw HTML:** never use `dangerouslySetInnerHTML` with data from metadata, broadcasts or imports. React escaping is the default; keep it.

@@ -24,4 +24,5 @@ The plugin runs inside Owlbear (Owlbear storage, multi-user) and also as a stand
 | `npm run dev` | Dev server (`/manifest.dev.json` for Owlbear, `/html/popover.html` as standalone tab) |
 | `npm run build` | Type check + build |
 | `npm run lint` | ESLint |
+| `npm run test` | Vitest (`src/**/*.test.ts`) |
 | `npm run deploy` | Version bump + build + publish |

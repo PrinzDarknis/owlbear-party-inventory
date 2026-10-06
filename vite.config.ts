@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 // Add one input per HTML entry (Owlbear iframe context).
 import { resolve } from "path";
 import { defineConfig } from "vite";
@@ -18,8 +19,11 @@ export default defineConfig({
       input: {
         popover: resolve(__dirname, "html", "popover.html"),
         background: resolve(__dirname, "html", "background.html"),
-        // "context-menu-example": resolve(__dirname, "html", "context-menu", "example.html"),
       },
     },
+  },
+  test: {
+    environment: "node",
+    include: ["src/**/*.test.ts"],
   },
 });
