@@ -1,0 +1,27 @@
+/* Copy to src/index.css. --obr-* variables are set at runtime by useObrTheme(). */
+:root {
+  --obr-primary: #bb99ff;
+  --obr-primary-contrast: #000000;
+  --obr-secondary: #ee99ff;
+  --obr-background: #1e2231;
+  --obr-paper: #3d4051;
+  --obr-text: #ffffff;
+  --obr-text-secondary: rgba(255, 255, 255, 0.7);
+  --obr-text-disabled: rgba(255, 255, 255, 0.5);
+
+  --space-xs: 4px;
+  --space-s: 8px;
+  --space-m: 16px;
+  --radius: 8px;
+
+  color-scheme: light dark;
+  font-family: Roboto, Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  color: var(--obr-text);
+}
+
+body {
+  margin: 0;
+  /* Owlbear draws the popover background; keep the iframe transparent. */
+  background: transparent;
+}

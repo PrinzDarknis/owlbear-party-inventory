@@ -1,0 +1,16 @@
+{
+  "version": "0.1.0",
+  "name": "Party Inventory",
+  "author": "PrinzDarknis",
+  "description": "Shared party inventory for Owlbear Rodeo.",
+  "manifest_version": 1,
+  "icon": "/owlbear-party-inventory/icon.svg",
+  "action": {
+    "title": "Party Inventory",
+    "icon": "/owlbear-party-inventory/icon.svg",
+    "popover": "/owlbear-party-inventory/html/popover.html",
+    "height": 600,
+    "width": 400
+  },
+  "background_url": "/owlbear-party-inventory/html/background.html"
+}

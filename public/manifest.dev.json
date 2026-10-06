@@ -1,0 +1,16 @@
+{
+  "version": "0.1.0",
+  "name": "Party Inventory (Dev)",
+  "author": "PrinzDarknis",
+  "description": "Local dev build",
+  "manifest_version": 1,
+  "icon": "/icon.svg",
+  "action": {
+    "title": "Party Inventory (Dev)",
+    "icon": "/icon.svg",
+    "popover": "/html/popover.html",
+    "height": 600,
+    "width": 400
+  },
+  "background_url": "/html/background.html"
+}

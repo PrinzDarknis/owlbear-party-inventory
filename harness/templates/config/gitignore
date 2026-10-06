@@ -1,0 +1,17 @@
+# Rename to .gitignore in the plugin root.
+node_modules
+dist
+dist-ssr
+*.local
+*.log
+.DS_Store
+.idea
+.vscode/*
+!.vscode/extensions.json
+
+# Claude: personal settings stay local
+.claude/settings.local.json
+
+# Environment files (never commit secrets)
+.env
+.env.*

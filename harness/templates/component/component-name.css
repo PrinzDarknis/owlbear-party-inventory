@@ -1,0 +1,15 @@
+.component-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--obr-text);
+}
+
+.component-name__title {
+  flex: 1;
+}
+
+.component-name__button {
+  color: var(--obr-primary-contrast);
+  background-color: var(--obr-primary);
+}

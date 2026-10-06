@@ -1,0 +1,16 @@
+{
+  "version": "0.1.0",
+  "name": "My Plugin",
+  "author": "<public display name>",
+  "description": "One sentence about what the plugin does.",
+  "manifest_version": 1,
+  "icon": "/my-plugin/icon.svg",
+  "action": {
+    "title": "My Plugin",
+    "icon": "/my-plugin/icon.svg",
+    "popover": "/my-plugin/html/popover.html",
+    "height": 600,
+    "width": 400
+  },
+  "background_url": "/my-plugin/html/background.html"
+}
