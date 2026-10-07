@@ -4,78 +4,106 @@ Branch: `feature/storage` · Rules: `harness/core/07-workflow.md` §Feature life
 
 ## Goal
 
-A storage layer that the manager (phase 3) can use without knowing the backend: the `InventoryStorage` interface, a memory backend (tests, fallback), a localStorage backend (standalone tab) and a registry for selecting the backend at startup. The Owlbear backend (phase 5) will implement the same interface later.
+A storage layer that the manager (phase 3) uses without knowing where data lives: the `InventoryStorage` contract, a memory controller (tests, fallback), a localStorage controller (standalone tab) and a registry for choosing the controller at startup. The layout below covers **all three controllers including Owlbear (phase 5)**, so later phases only fill folders planned here.
 
 ## Scope
 
-- In: interface and types in `src/storage/`, memory backend, local backend (incl. cross-tab sync), registry, a shared contract test suite that every backend must pass, docs.
-- Out: Owlbear backend, text server and budget display (phase 5); manager logic such as reference integrity, cycle checks and rights (phase 3); UI for backend selection (phase 4); JSON export/import (phase 5).
+- In: contract, shared controller tools, memory and local controllers (incl. cross-tab sync), registry, contract test suite, docs.
+- Out: Owlbear controller, text server and budget display (phase 5; structure fixed here); manager logic such as integrity, cycles, rights and in-memory state (phase 3); UI for controller selection and "clear local data" (phase 4); JSON export/import (phase 5).
+
+## Principles
+
+1. **One state, held by the manager.** Controllers are **stateless**: `load()` reads from their source, `apply()` writes to it. Only the memory controller holds records, because memory is its source. No cache layer between manager and storage.
+2. **Only the contract (`interface/`) sits between manager and controllers.** Everything else in `src/storage/` is a controller detail.
+3. **One folder per controller, same pattern for each.** A controller's persisted format (DTO) lives in its own `dto/` folder because only it uses it.
+4. **`backends/shared/` holds tools used by at least two controllers.** It is not a layer; the manager never imports it.
+5. **All controllers live in `src/storage/backends/`, Owlbear included.** The SDK is still imported only in `src/obr/`: the Owlbear controller uses the `api` facade (thin room metadata and broadcast services). Storage logic (keys, budget, text protocol) stays in the storage layer.
 
 ## Structure
 
-Target layout of `src/storage/`, grouped by responsibility. Every folder has an `index.ts` barrel; tests sit next to the code they test.
-
 ```
 src/storage/
-  index.ts                          public API for the manager (re-exports interface/ and registry/)
-  interface/                        contract between manager and backends (types only)
-    inventory-storage.types.ts      InventoryStorage, StorageCapabilities, StorageRole
-    snapshot.types.ts               InventorySnapshot, RecordKind
-    change-set.types.ts             ChangeSet, RecordUpserts, RecordRemovals, StorageChange
-    texts.types.ts                  TextRef, ItemTexts, InstanceTexts, TextsFor
-  document/                         serialized document shared by memory and local (internal)
-    storage-document.types.ts       StorageDocument (JSON shape, version)
-    storage-document.service.ts     (de)serialize with entry validation
-    change-set.service.ts           apply a changeset to a document, derive StorageChange
-  backends/                         one folder per backend controller
-    memory/
-      memory-inventory.storage.ts   MemoryInventoryStorage
-    local/
-      local-inventory.storage.ts    LocalInventoryStorage
-      local-storage.constant.ts     storage key, document version
-  registry/                         backend selection at startup
-    storage-backend.types.ts        StorageBackend
-    storage.registry.ts             STORAGE_BACKENDS
-  testing/                          test-only helpers, never imported by app code
-    storage.contract.ts             contract test suite every backend runs
-    fake-web-storage.ts             in-memory Storage + event target for local tests
+  index.ts                               public API for the manager: interface/ + registry/
+  interface/                             contract manager ↔ controllers
+    inventory-storage.types.ts           InventoryStorage, StorageCapabilities, StorageRole
+    snapshot.types.ts                    InventorySnapshot
+    change-set.types.ts                  ChangeSet, RecordUpserts, RecordRemovals
+    storage-change.types.ts              StorageChange
+    texts.types.ts                       TextRef, ItemTexts, InstanceTexts, TextsFor
+    storage-error.ts                     StorageError, StorageErrorCode
+  backends/                              one folder per controller + shared tools
+    shared/                              used by ≥ 2 controllers, not public
+      record-set/                        whole inventory as maps (memory, local)
+        record-set.types.ts              RecordSet
+        record-set.service.ts            createEmptyRecordSet, toSnapshot (clones), textsOf
+        apply-change-set.service.ts      applyChangeSet (pure, new RecordSet, removal wins)
+      change-notifier/                   listener handling (all controllers)
+        change-notifier.ts               ChangeNotifier: subscribe, emit, dispose
+      web-storage/                       safe localStorage access (local, Owlbear text cache)
+        web-storage.service.ts           readJson, writeJson, remove, isWebStorageAvailable
+    memory/                              phase 2
+      memory-inventory.storage.ts        MemoryInventoryStorage (optional seed snapshot)
+    local/                               phase 2
+      local-inventory.storage.ts         LocalInventoryStorage (stateless, storage event, clear())
+      local-storage.constant.ts          LOCAL_INVENTORY_KEY
+      dto/                               persisted format in localStorage
+        local-inventory.dto.types.ts     LocalInventoryDto, DtoReadResult
+        local-inventory.dto.constant.ts  LOCAL_INVENTORY_DTO_VERSION
+        local-inventory.dto.service.ts   toDto, fromDto (per-entry validation)
+    owlbear/                             phase 5 (structure fixed now)
+      owlbear-inventory.storage.ts       OwlbearInventoryStorage (uses api from src/obr)
+      owlbear-storage.constant.ts        metadata keys i/n/c, broadcast channels, budget
+      dto/                               compact records per metadata key (no texts)
+      texts/                             text cache in the browser (uses shared/web-storage)
+      text-server/                       GM text server, runs in the background iframe
+      text-protocol/                     broadcast messages: types + parsers
+  registry/                              controller selection at startup
+    storage-backend.types.ts             StorageBackend { id, label, isAvailable(), create() }
+    storage.registry.ts                  STORAGE_BACKENDS (memory, local; owlbear via import() in phase 5)
+  testing/                               test-only, never imported by app code
+    storage.contract.ts                  contract suite every controller runs
+    fake-web-storage.ts                  Storage fake + storage event trigger
 ```
 
-The Owlbear backend (phase 5) lives in `src/obr/storage/` (SDK imports only in `src/obr/`, see deviations.md) and implements `InventoryStorage` from `src/storage`.
+Every folder has an `index.ts` barrel; tests (`*.test.ts`) sit next to the code. Phase 5 adds only a thin SDK facade to `src/obr/` (`obr-room-metadata.service.ts`, `obr-broadcast.service.ts`), without storage logic.
 
 ## Decisions
 
-| Topic                  | Decision                                                                                                                                                                                                                                                                                                                                                                       |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Format at the boundary | **Class instances** (`Item`, `ItemInstance`, `Character`). Each backend calls `serialize()` / `deserialize()` itself, and the DTOs stay unexported. Backends hand out fresh instances (`deserialize`/`clone`), so callers never mutate internal state.                                                                                                                         |
-| Read/write API         | **Snapshot + changeset:** `load(): Promise<InventorySnapshot>` returns `{ items, instances, characters }`. `apply(changes: ChangeSet): Promise<void>` takes `{ upsert: { items?, instances?, characters? }, remove: { items?, instances?, characters? } }` (ids). It is atomic per call; in phase 5 this maps to one `setMetadata`. `upsert` replaces the whole record by id.  |
-| Long texts             | Written inside the record; the backend decides where they end up. `load()` may omit texts if `capabilities.lazyTexts`. `loadTexts(ref: TextRef)` (`{ kind: "item" \| "instance", id }`) returns `{ description?, dmNotes? }` or `{ notes? }`. Local and memory store everything together (`lazyTexts: false`).                                                                 |
-| Change notification    | `subscribe(listener): () => void`. The listener fires after every successful change, **including your own** `apply` and other tabs. The payload `StorageChange` holds the changed ids per kind, so the manager can reload selectively.                                                                                                                                         |
-| Role                   | `getRole(): Promise<StorageRole>` (`"GM" \| "PLAYER"`, own type in `src/storage`, no import from `src/obr`). Local and memory always return `"GM"`; "view as player" is a manager/UI concern (phase 3/4).                                                                                                                                                                      |
-| Capabilities           | `{ persistent, lazyTexts, multiUser }`. Memory: `false/false/false`. Local: `persistent` false if localStorage is unavailable (in-memory fallback).                                                                                                                                                                                                                            |
-| Integrity              | Backends store what they are given (after `deserialize`/normalization). Dangling references, cycles and rights are checked by the manager (phase 3).                                                                                                                                                                                                                           |
-| Local layout           | One key `STORAGE_KEY("local/inventory")` holds a versioned document `{ version: 1, items: [], instances: [], characters: [] }`. Each entry is validated on read via `deserialize` and invalid entries are dropped (logged without content). Every access is wrapped in try/catch with an in-memory fallback (05 §Privacy). There is a `clear()` method for "Clear local data". |
-| Cross-tab              | The local backend listens to the `storage` event for its key, reloads and fires `StorageChange`.                                                                                                                                                                                                                                                                               |
-| Testability            | The local backend gets a `Storage`-like object and an optional event target injected (default `window.localStorage` / `window`). Tests use a fake, so no jsdom and no new dependency.                                                                                                                                                                                          |
-| Registry               | `STORAGE_BACKENDS: StorageBackend[]` with `{ id, label, isAvailable(): Promise<boolean>, create(): Promise<InventoryStorage> }`. Phase 2: `local`, `memory`. `owlbear` follows in phase 5 via dynamic `import()`.                                                                                                                                                              |
-| Async                  | All read/write methods return promises (the Owlbear backend is async), local/memory too.                                                                                                                                                                                                                                                                                       |
-| Changeset conflicts    | A removal wins over an upsert of the same id in the same changeset. Unknown ids in `remove` are ignored.                                                                                                                                                                                                                                                                       |
-| Lifecycle              | `dispose()` releases listeners (e.g. the `storage` event); the instance is unusable afterwards.                                                                                                                                                                                                                                                                                |
+| Topic                  | Decision                                                                                                                                                                                                                                   |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Format at the boundary | **Class instances** (`Item`, `ItemInstance`, `Character`). Controllers call `serialize()` / `deserialize()` themselves; model DTOs stay unexported. Controllers hand out fresh instances.                                                  |
+| Read/write API         | `load(): Promise<InventorySnapshot>`; `apply(changes: ChangeSet)` is atomic (one `setMetadata` in phase 5). `upsert` replaces whole records by id; a removal wins over an upsert of the same id; unknown removal ids are ignored.          |
+| Long texts             | Written inside the record; the controller decides where they end up. `load()` omits them if `capabilities.lazyTexts`; `loadTexts(ref)` returns them. Memory and local keep them in the record.                                             |
+| Change notification    | `subscribe(listener)` with `StorageChange = { type: "records" } \| { type: "texts"; refs } \| { type: "role" }`. No record ids: controllers are stateless, the manager reloads and compares with its own state. Fires for own `apply` too. |
+| Errors                 | `StorageError` with `code: "unreadable" \| "unsupported-version" \| "write-failed" \| "too-large"`. Messages never contain stored content. No `cause` (the TS lib target has no `ErrorOptions`).                                           |
+| Role                   | `getRole(): Promise<StorageRole>`; memory and local always `"GM"`. "View as player" is a manager/UI concern.                                                                                                                               |
+| Capabilities           | `{ persistent, lazyTexts, multiUser }`. Memory `false/false/false`, local `true/false/false`, Owlbear `true/true/true`.                                                                                                                    |
+| Integrity              | Controllers store what they get (normalized via `deserialize(serialize())`). References, cycles and rights: manager (phase 3).                                                                                                             |
+| Stored copies          | Incoming records are stored as normalized, unbound copies; a record that fails validation makes `apply` reject.                                                                                                                            |
+| Local source           | One key `LOCAL_INVENTORY_KEY` with a versioned DTO `{ version, items, instances, characters }`. Every `load`/`apply` reads it again (no cache). Invalid entries are dropped and counted.                                                   |
+| Unreadable local data  | Never overwritten: `load` and `apply` reject with `unreadable` / `unsupported-version` until the user calls `clear()` (UI in phase 4).                                                                                                     |
+| No localStorage        | `local.isAvailable()` returns `false` (probe in try/catch); the start dialog offers memory instead ("not saved"). The local controller has no fallback mode of its own; core 05's in-memory fallback is met via the registry.              |
+| Cross-tab              | The local controller listens to the `storage` event for its key and emits `{ type: "records" }`.                                                                                                                                           |
+| Testability            | The local controller gets a `Storage`-like object and an event target injected; tests use `testing/fake-web-storage.ts` (no jsdom, no new dependency).                                                                                     |
+| Registry               | `STORAGE_BACKENDS: StorageBackend[]` with `{ id, label, isAvailable(): Promise<boolean>, create(): Promise<InventoryStorage> }`.                                                                                                           |
+| Async                  | All read/write methods return promises.                                                                                                                                                                                                    |
+| Lifecycle              | `dispose()` releases listeners (e.g. the `storage` event); the instance is unusable afterwards.                                                                                                                                            |
 
 ## Steps
 
-Check a step only when it is implemented, tested and documented.
+Check a step only when it is implemented, tested and documented. After each step: lint/build/test, update status, propose a commit, wait for the user's review.
 
-- [x] 1. Types and interface in `src/storage/interface/` (contract files, see Structure), barrels `src/storage/interface/index.ts` and `src/storage/index.ts`.
-- [ ] 2. Shared document in `src/storage/document/`: document type, (de)serialization with entry validation, changeset application, `StorageChange` derivation. Tests.
-- [ ] 3. Memory backend in `src/storage/backends/memory/` plus the reusable **contract test suite** in `src/storage/testing/storage.contract.ts`.
-- [ ] 4. Local backend in `src/storage/backends/local/`: versioned document, try/catch + in-memory fallback, quota error → `apply` rejects without changing state, `storage` event, `clear()`. Fake storage in `src/storage/testing/`. Contract tests + local-specific tests (corrupt JSON, invalid entries, fallback, foreign tab).
-- [ ] 5. Registry in `src/storage/registry/` + tests.
-- [ ] 6. Docs: `data-model.md` (local key, document version), `overview.md`, `roadmap.md`; lint/build/test green.
+- [x] 1. Contract: `StorageChange` (own file, no ids), `StorageError`, `RecordKind` removed; plan replaced by the full layout. Obsolete `document/` removed.
+- [ ] 2. Shared tools in `backends/shared/` (record-set, change-notifier, web-storage) + tests.
+- [ ] 3. Contract suite `testing/storage.contract.ts` + memory controller `backends/memory/`.
+- [ ] 4. Local controller `backends/local/` incl. `dto/` and `testing/fake-web-storage.ts`. Tests: contract suite, corrupt JSON, other version (not overwritten), invalid entries, quota error, storage event, `clear()`.
+- [ ] 5. Registry `registry/` (memory, local) + tests.
+- [ ] 6. Docs: `data-model.md` (local key, DTO version), `roadmap.md` (architecture, Owlbear controller path), `deviations.md` (row 1: Owlbear controller in `src/storage/backends/owlbear/` via the `src/obr` facade), `overview.md`.
 - [ ] Finish: lasting knowledge moved to `harness/project/*`, `current-feature/` emptied, merge after asking
 
 ## Verification
 
-- `npm run test`: the contract suite runs against memory and local; local special cases are covered.
-- `npm run lint` and `npm run build` are green.
-- No live test in Owlbear (the UI follows in phase 4); `/harness-review` before finishing.
+- `npm run test`: contract suite against memory and local; tools, DTO, local special cases and registry covered.
+- `npm run lint` and `npm run build` green.
+- Top level of `src/storage/` contains only `index.ts`, `interface/`, `backends/`, `registry/`, `testing/`.
+- No live test in Owlbear in phase 2.

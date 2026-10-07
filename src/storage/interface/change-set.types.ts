@@ -22,10 +22,3 @@ export interface ChangeSet {
   upsert?: RecordUpserts;
   remove?: RecordRemovals;
 }
-
-/** Changed ids per kind (upserted or removed), delivered to `subscribe` listeners. */
-export interface StorageChange {
-  items: string[];
-  instances: string[];
-  characters: string[];
-}

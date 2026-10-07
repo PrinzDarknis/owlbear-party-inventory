@@ -1,13 +1,14 @@
-import { ChangeSet, StorageChange } from "./change-set.types";
+import { ChangeSet } from "./change-set.types";
 import { InventorySnapshot } from "./snapshot.types";
+import { StorageChange } from "./storage-change.types";
 import { TextRef, TextsFor } from "./texts.types";
 
-/** Role reported by a backend. Own type so `src/storage` doesn't depend on `src/obr`. */
+/** Role reported by a controller. Own type so `src/storage` doesn't depend on `src/obr`. */
 export type StorageRole = "GM" | "PLAYER";
 
-/** What a backend can do; the UI and manager adapt to it. */
+/** What a controller can do; the UI and manager adapt to it. */
 export interface StorageCapabilities {
-  /** Data survives a reload. `false` for memory and for local without localStorage. */
+  /** Data survives a reload. `false` for memory. */
   readonly persistent: boolean;
   /** `load()` omits long texts; fetch them with `loadTexts`. */
   readonly lazyTexts: boolean;
@@ -17,23 +18,29 @@ export interface StorageCapabilities {
 
 /**
  * Backend-independent access to the inventory: the contract between the
- * manager and the storage backends. The manager only knows this interface.
- * Implementations hand out fresh instances, so callers may mutate returned
- * objects without affecting stored state. Integrity (dangling references,
- * cycles) and rights are checked by the manager, not here.
+ * manager and the storage controllers. The manager only knows this interface
+ * and holds the only in-memory state; controllers read from and write to
+ * their source on every call. Implementations hand out fresh instances, so
+ * callers may mutate returned objects without affecting stored data.
+ * Integrity (dangling references, cycles) and rights are checked by the
+ * manager, not here.
  */
 export interface InventoryStorage {
-  /** Stable backend id, matching its registry entry. */
+  /** Stable controller id, matching its registry entry. */
   readonly id: string;
   readonly capabilities: StorageCapabilities;
 
-  /** All records. Long texts may be omitted if `capabilities.lazyTexts`. */
+  /**
+   * All records. Long texts may be omitted if `capabilities.lazyTexts`.
+   * Rejects with a `StorageError` if the stored data can't be read.
+   */
   load(): Promise<InventorySnapshot>;
 
   /**
    * Stores a changeset atomically. Records are written with their long texts;
-   * the backend decides where they end up. Rejects without changing anything
-   * if the write fails (e.g. quota or size limit).
+   * the controller decides where they end up. A removal wins over an upsert
+   * of the same id; unknown removal ids are ignored. Rejects with a
+   * `StorageError` without changing anything if the write fails.
    */
   apply(changes: ChangeSet): Promise<void>;
 
@@ -45,7 +52,8 @@ export interface InventoryStorage {
 
   /**
    * Notifies after every successful change, including this client's own
-   * `apply` and changes from other tabs or users. Returns the unsubscribe.
+   * `apply` and changes from other tabs or users, and after role changes.
+   * Returns the unsubscribe.
    */
   subscribe(listener: (change: StorageChange) => void): () => void;
 
