@@ -30,8 +30,8 @@ components → hooks → manager → storage (interface) → storage/local | sto
                          ↘ model (classes with serialize/deserialize) ↙
 ```
 - `src/model/`: classes `Item`, `ItemInstance`, `Character` (with `serialize`, `static deserialize`), plain types `ItemLocation` and `Rarity`; size limits.
-- `src/storage/`: `InventoryStorage` interface (CRUD for items, instances and characters; exact data format at the boundary decided in phase 2, `loadTexts/saveTexts`, `subscribe`, `getRole`, `capabilities`), storage registry `{ id, label, isAvailable(), create() }`, local and memory backends.
-- `src/obr/obr-inventory.storage.ts`: Owlbear backend, loaded via dynamic `import()`.
+- `src/storage/`: `interface/` (`InventoryStorage` contract), `document/` (shared serialized format), `backends/local`, `backends/memory`, `registry/`, `testing/` (contract suite, fakes). Layout and API: see the phase 2 plan, later `data-model.md`.
+- `src/obr/storage/obr-inventory.storage.ts`: Owlbear backend, loaded via dynamic `import()`.
 - `src/manager/inventory-manager.ts`: CRUD, `assignItem` (creates an instance), `moveInstance` with cycle and `hasInventory` checks, role-based rules, tree building, derived values (total weight, instance count), `update…(id, fn)` on clones, a version counter for `useSyncExternalStore`.
 - `src/hooks/`: `useInventoryManager`, `useCharacters`, `useItems`, `useInstancesAt`, `useInstance`, `useTexts`.
 - `src/components/`: `app`, `storage-select`, `ui`, `character-tab`, `inventory` (recursive `Inventory` + `InstanceRow`), `instance-details`, `dm/item-catalog`, `dm/item-editor`, `dm/assign-dialog`.

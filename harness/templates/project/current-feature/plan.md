@@ -9,6 +9,15 @@ Branch: `feature/<slug>` · Rules: `harness/core/07-workflow.md` §Feature lifec
 - In: <what belongs to this feature>
 - Out: <what explicitly doesn't (later features, known limits)>
 
+## Structure
+Target tree of every folder this feature creates or extends, grouped by responsibility (`harness/core/04-conventions.md` §Folder structure rules). One line per file with its purpose.
+```
+src/<module>/
+  index.ts              public API
+  <role>/               e.g. interface/, backends/<impl>/, registry/, testing/
+    <file>.ts           <purpose>
+```
+
 ## Decisions
 | Topic | Decision |
 | --- | --- |

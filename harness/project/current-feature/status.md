@@ -2,8 +2,8 @@
 
 Snapshot of the current state. **Overwrite** this file after each step; never append history.
 
-- **Current step:** plan (approval pending)
-- **Done last:** branch `feature/storage` created, plan drafted with the user's decisions (class instances, snapshot + changeset, texts in the record + `loadTexts`, cross-tab sync).
-- **Next action:** after approval: step 1, types and interface in `src/storage/`.
-- **Open questions:** user approval of `plan.md`.
+- **Current step:** 1. Types and interface (waiting for review and commit by the user)
+- **Done last:** step 1 restructured: contract types split by topic into `src/storage/interface/`, target tree for all of `src/storage/` added to `plan.md` → Structure, step paths updated.
+- **Next action:** after the user's commit: step 2, `src/storage/document/` (document type, (de)serialization with entry validation, changeset application, `StorageChange` derivation) plus tests.
+- **Open questions:** none
 - **Blockers:** none

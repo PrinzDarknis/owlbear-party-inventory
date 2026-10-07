@@ -30,9 +30,16 @@ src/
   utils/<name>.service.ts               one pure function (or tightly related group) per file
 ```
 
+### Folder structure rules
+- **Group by responsibility, never by "everything of this module".** A module folder (e.g. a storage or manager layer) gets one sub-folder per role: contracts/interfaces, shared internals, one folder per implementation (controller, backend, adapter), wiring (registry, factory) and test-only helpers. A flat catch-all folder is not acceptable.
+- **Plan the structure before the first file.** Every feature plan (`current-feature/plan.md` → Structure) shows the target tree of the folders it creates or extends. Files are created in their final place from the start, not moved there later.
+- One topic per file. Split type files by topic (contract, snapshot, changeset, …) instead of collecting every type of a module in one file.
+- Each layer exposes a public barrel (`<module>/index.ts`). Internal folders (shared helpers, test helpers) are not re-exported from it.
+- Test-only helpers (contract suites, fakes) live in a `testing/` folder of their module and are never imported by app code.
+
 ## File naming
 - **kebab-case** file and folder names.
-- Suffixes: `.component.tsx`, `.hook.ts`, `.service.ts`, `.types.ts`, `.default.ts`, `.parse.ts`, `.constant.ts`, `.enum.ts`, `.test.ts`, `.mockdata.ts`.
+- Suffixes: `.component.tsx`, `.hook.ts`, `.service.ts`, `.types.ts`, `.default.ts`, `.parse.ts`, `.constant.ts`, `.enum.ts`, `.test.ts`, `.mockdata.ts`, `.storage.ts` (a class implementing a storage/backend interface), `.registry.ts` (list of selectable implementations).
 - Every folder that is imported from elsewhere has an `index.ts` barrel.
 
 ## TypeScript

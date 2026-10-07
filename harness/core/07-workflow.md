@@ -11,7 +11,7 @@
 ## Feature lifecycle (`harness/project/current-feature/`)
 A feature branch carries **one complete feature**, including all of its steps. Its plan and progress live in `harness/project/current-feature/` while the branch exists, so work can resume in a new session at any time. On the default branch (`main`/`master`) the folder is **empty** (only `.gitkeep`).
 
-1. **Start:** create the branch `feature/<slug>` from the up-to-date default branch. Write `current-feature/plan.md` from the template (`harness/templates/project/current-feature/`) together with the user: goal, scope, decisions, and a step-by-step checklist. A large step may get its own sub-plan `current-feature/step-<n>-<slug>.md`. Get the user's approval before implementing.
+1. **Start:** create the branch `feature/<slug>` from the up-to-date default branch. Write `current-feature/plan.md` from the template (`harness/templates/project/current-feature/`) together with the user: goal, scope, **target folder structure** (see [04 §Folder structure rules](04-conventions.md#folder-structure-rules)), decisions, and a step-by-step checklist. A large step may get its own sub-plan `current-feature/step-<n>-<slug>.md`. Get the user's approval before implementing.
 2. **During the work:** after each step (and before ending a session) update the checklist in `plan.md` and **overwrite** `status.md` with the current state: current step, what was done last, next action, open questions, blockers. Decisions made on the way go into `plan.md` → Decisions. `status.md` is a snapshot, not a log: never append history.
 3. **Keep it small:** no logs, no dated session notes, no copies of code or diffs. Remove sub-plans of finished steps once their outcome is in `plan.md`. Git history holds the past.
 4. **Finish:** a feature is done when every checklist item in `plan.md` is checked and the definition of done below is met. Then
@@ -24,6 +24,7 @@ A feature branch carries **one complete feature**, including all of its steps. I
 - Keep changes minimal and focused. No drive-by refactors outside the task. Note them in `harness/project/known-issues.md` instead.
 - New OBR access goes through `src/obr/` (or the project's equivalent facade named in deviations).
 - Use the skills: `/new-component`, `/new-obr-feature`, `/harness-review`, `/release`.
+- **Claude never commits.** Every change is reviewed by a human first. After a step, Claude leaves the changes uncommitted, lists them and proposes a commit message; the user commits after review. The next step starts only after the user's go-ahead. Wherever this harness says "commit", read it as "propose a commit for the user".
 - Ask the user before:
   - deploying, pushing or creating PRs,
   - adding a runtime dependency,
