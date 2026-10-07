@@ -1,6 +1,6 @@
-import { ChangeSet } from "./change-set.types";
 import { InventorySnapshot } from "./snapshot.types";
 import { StorageChange } from "./storage-change.types";
+import { StorageOperation } from "./storage-operation.types";
 import { TextRef, TextsFor } from "./texts.types";
 
 /** Role reported by a controller. Own type so `src/storage` doesn't depend on `src/obr`. */
@@ -37,12 +37,13 @@ export interface InventoryStorage {
   load(): Promise<InventorySnapshot>;
 
   /**
-   * Stores a changeset atomically. Records are written with their long texts;
-   * the controller decides where they end up. A removal wins over an upsert
-   * of the same id; unknown removal ids are ignored. Rejects with a
-   * `StorageError` without changing anything if the write fails.
+   * Applies the operations in order and stores the result atomically: either
+   * all of them or none. Records are written with their long texts; the
+   * controller decides where they end up. Rejects with a `StorageError`
+   * without changing anything if the write fails. One successful call emits
+   * one change, however many operations it holds.
    */
-  apply(changes: ChangeSet): Promise<void>;
+  apply(operations: readonly StorageOperation[]): Promise<void>;
 
   /** Long texts of one record; empty object if unknown. */
   loadTexts<Ref extends TextRef>(ref: Ref): Promise<TextsFor<Ref>>;

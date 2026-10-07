@@ -77,6 +77,7 @@ Naming: plain types are **parsed** (`parse<Name>(value: unknown)`), class object
     - `serialize(): <Name>Data` returns the plain DTO. It reads the private fields, so getter overrides in subclasses never reach storage.
     - `static deserialize(value: unknown): <Class> | undefined` **always takes `unknown`** and validates and normalizes. It returns `undefined` if required fields are missing.
   - There are no other conversion paths: **no separate `.parse.ts`**, no parser that returns the DTO, no typed `fromData`/`parse` next to `deserialize`. Tests use a small local helper that throws if `deserialize` returns `undefined`. `clone()` copies the private fields directly.
+  - **Use the model's own methods; don't rebuild them outside.** A copy is always `instance.clone()`, never a helper like `copyX(x)` or `X.deserialize(x.serialize())`. Validation already happened in the constructor and setters, so code outside the model doesn't re-validate class instances. `deserialize` is only for untrusted data.
   - The DTO interface (`<name>.types.ts`) is **not exported from `index.ts` by default**. Export it only when a place really needs the plain shape and can't use the class. Name the reason in a comment at the export.
   - Storage, sync and import code hand raw data to `<Class>.deserialize` and write `instance.serialize()`.
 
