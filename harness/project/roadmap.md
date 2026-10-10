@@ -4,8 +4,15 @@ Agreed rough plan (2026-10-06): the product-level view. Each phase is one featur
 
 ## Current status and next step
 
-- **Done:** phases 0, 1 and 2. Check `git branch` / `git log` whether `feature/storage` is merged to `master` yet.
-- **Next:** phase 3 (manager). Create `feature/manager`, then write `current-feature/plan.md` with the user (approval before implementing). Inputs from phase 2: the manager holds the **only** in-memory state, builds `StorageOperation` lists for `apply`, reloads on a `records` change and compares, and rebinds items to instances (`bindItem`) after every `load()`. See [data-model.md](data-model.md) §Storage layer. Open for phase 3/4: how "clear local data" reaches `LocalInventoryStorage.clear()` ([known-issues.md](known-issues.md) #3).
+- **Done:** phases 0, 1 and 2 (all merged to `master`; `current-feature/` is empty).
+- **Next:** phase 3 (manager). Create `feature/manager` from `master`, then write `current-feature/plan.md` with the user (approval before implementing). Plan the manager layer as a whole, including what the hooks (phase 4) and the Owlbear controller (phase 5) need from it (`harness/core/04-conventions.md` §Folder structure rules).
+- **Inputs from phase 2** (details: [data-model.md](data-model.md) §Storage layer):
+  - The manager holds the **only** in-memory state. Controllers are stateless; on a `records` change the manager reloads (`load()`) and compares with its state, on `texts` it refetches the given refs, on `role` it calls `getRole()` again.
+  - After every `load()` the manager rebinds items to instances (`bindItem`); stored instances may carry stale bindings.
+  - Writes are `StorageOperation` lists, applied in order and atomically. One UI action becomes one `apply` call, also when it changes several records: delete character → re-home its instances; delete item definition → delete its instances and re-home their contents; delete container → re-home its contents; split stack → update source quantity + create instance; merge stacks → update one + delete one.
+  - `apply` and `load` reject with `StorageError` (`unreadable`, `unsupported-version`, `write-failed`, `too-large`, `unavailable`); the manager must surface them, never swallow them.
+  - Tests run against `MemoryInventoryStorage`; `describeStorageContract` stays the reference for controller behavior.
+- **Open questions for the phase 3 plan:** how "clear local data" reaches `LocalInventoryStorage.clear()` ([known-issues.md](known-issues.md) #3); exact delete semantics (re-home to `unassigned` vs. delete contents, or block deletion); where "view as player" lives (manager vs. UI); how move/split rules map to player rights.
 
 ## Working mode
 

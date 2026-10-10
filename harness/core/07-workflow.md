@@ -24,7 +24,7 @@ A feature branch carries **one complete feature**, including all of its steps. I
 - Keep changes minimal and focused. No drive-by refactors outside the task. Note them in `harness/project/known-issues.md` instead.
 - New OBR access goes through `src/obr/` (or the project's equivalent facade named in deviations).
 - Use the skills: `/new-component`, `/new-obr-feature`, `/harness-review`, `/release`.
-- **Claude never commits.** Every change is reviewed by a human first. After a step, Claude leaves the changes uncommitted, lists them and proposes a commit message; the user commits after review. The next step starts only after the user's go-ahead. Wherever this harness says "commit", read it as "propose a commit for the user".
+- **Claude never commits.** Every change is reviewed by a human first. After a step, Claude leaves the changes uncommitted, lists them and proposes a commit message; the user commits after review. The next step starts only after the user's go-ahead. Wherever this harness says "commit", read it as "propose a commit for the user". Claude also never changes the git index or history: no `git add`, `git rm`, `git mv`, `git restore --staged`, `git stash`, `git reset`, `git rebase`. Files are created, moved and deleted in the working tree only; staging is the user's part of the review.
 - Ask the user before:
   - deploying, pushing or creating PRs,
   - adding a runtime dependency,
