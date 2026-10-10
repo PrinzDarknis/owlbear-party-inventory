@@ -66,15 +66,17 @@ export class LocalInventoryStorage implements InventoryStorage {
     events?.addEventListener("storage", this.#onStorageEvent);
   }
 
-  /** Whether the browser's localStorage can be written and read back (probe in try/catch). */
-  static isAvailableInBrowser(): boolean {
-    return isWebStorageAvailable(getBrowserStorage(), LOCAL_PROBE_KEY);
-  }
-
   /** Controller on the browser's localStorage, or `undefined` if it can't be accessed. */
   static fromBrowser(): LocalInventoryStorage | undefined {
     const storage = getBrowserStorage();
     return storage ? new LocalInventoryStorage(storage, window) : undefined;
+  }
+  // #endregion
+
+  // #region Availability
+  /** Whether the browser's localStorage can be written and read back (probe in try/catch). */
+  static isAvailableInBrowser(): boolean {
+    return isWebStorageAvailable(getBrowserStorage(), LOCAL_PROBE_KEY);
   }
   // #endregion
 

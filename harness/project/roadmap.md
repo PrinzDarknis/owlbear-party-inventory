@@ -5,7 +5,7 @@ Agreed rough plan (2026-10-06): the product-level view. Each phase is one featur
 ## Current status and next step
 
 - **Done:** phases 0, 1 and 2. Check `git branch` / `git log` whether `feature/storage` is merged to `master` yet.
-- **Next:** phase 3 (manager). Create `feature/manager`, then write `current-feature/plan.md` with the user (approval before implementing). Inputs from phase 2: the manager holds the **only** in-memory state, builds `StorageOperation` lists for `apply`, reloads on a `records` change and compares, and rebinds items to instances (`bindItem`) after every `load()`. See [data-model.md](data-model.md) §Storage layer.
+- **Next:** phase 3 (manager). Create `feature/manager`, then write `current-feature/plan.md` with the user (approval before implementing). Inputs from phase 2: the manager holds the **only** in-memory state, builds `StorageOperation` lists for `apply`, reloads on a `records` change and compares, and rebinds items to instances (`bindItem`) after every `load()`. See [data-model.md](data-model.md) §Storage layer. Open for phase 3/4: how "clear local data" reaches `LocalInventoryStorage.clear()` ([known-issues.md](known-issues.md) #3).
 
 ## Working mode
 
