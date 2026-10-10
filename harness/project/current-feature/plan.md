@@ -109,7 +109,7 @@ Check a step only when it is implemented, tested and documented. After each step
 - [x] 3. Contract suite `testing/storage.contract.ts` (`describeStorageContract`) + memory controller `backends/memory/`.
 - [x] 4. Local controller `backends/local/` incl. `dto/`; `testing/fake-storage-events.ts`. Tests: contract suite, unreadable data (corrupt JSON, invalid shape, no/other version; never overwritten), blocked reads, invalid entries, write failure, storage events, `clear()`, `fromBrowser()`.
 - [x] 5. Registry `registry/` (local, memory) + tests; `src/storage/index.ts` exports `interface/` + `registry/`.
-- [ ] 6. Docs: `data-model.md` (local key, DTO version), `roadmap.md` (architecture, Owlbear controller path), `deviations.md` (row 1: Owlbear controller in `src/storage/backends/owlbear/` via the `src/obr` facade), `overview.md`.
+- [x] 6. Docs: `data-model.md` (§Storage layer, local keys, local DTO version), `roadmap.md` (phase 2 done, architecture, Owlbear controller path, inputs for phase 3), `deviations.md` (row 1: controllers in `src/storage/backends/`, Owlbear via the `src/obr` facade), `overview.md`.
 - [ ] Finish: lasting knowledge moved to `harness/project/*`, `current-feature/` emptied, merge after asking
 
 ## Verification
