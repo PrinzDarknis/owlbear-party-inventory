@@ -14,6 +14,7 @@ import {
   ChangeNotifier,
   createEmptyRecordSet,
   getBrowserStorage,
+  isWebStorageAvailable,
   readJson,
   RecordSet,
   removeKey,
@@ -28,6 +29,7 @@ import {
 import { fromDto, toDto } from "./dto";
 import {
   LOCAL_INVENTORY_KEY,
+  LOCAL_PROBE_KEY,
   LOCAL_STORAGE_ID,
 } from "./local-storage.constant";
 
@@ -62,6 +64,11 @@ export class LocalInventoryStorage implements InventoryStorage {
     this.#storage = storage;
     this.#events = events;
     events?.addEventListener("storage", this.#onStorageEvent);
+  }
+
+  /** Whether the browser's localStorage can be written and read back (probe in try/catch). */
+  static isAvailableInBrowser(): boolean {
+    return isWebStorageAvailable(getBrowserStorage(), LOCAL_PROBE_KEY);
   }
 
   /** Controller on the browser's localStorage, or `undefined` if it can't be accessed. */

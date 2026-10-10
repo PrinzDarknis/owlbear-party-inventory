@@ -2,8 +2,8 @@
 
 Snapshot of the current state. **Overwrite** this file after each step; never append history.
 
-- **Current step:** 4. Local controller (waiting for review and commit by the user)
-- **Done last:** step 4: `src/storage/backends/local/` (`LocalInventoryStorage`, constants, `dto/` with `toDto` / `fromDto`), `WebStorageEvents` in `shared/web-storage`, `testing/fake-storage-events.ts`; 37 new tests.
-- **Next action:** after the user's commit: step 5, registry `src/storage/registry/` (memory, local) + tests.
+- **Current step:** 5. Registry (waiting for review and commit by the user)
+- **Done last:** step 5: `src/storage/registry/` (`StorageBackend`, `STORAGE_BACKENDS`, `findStorageBackend`), public barrel `src/storage/index.ts` extended; new error code `unavailable`; `LocalInventoryStorage.isAvailableInBrowser()`; 6 new tests.
+- **Next action:** after the user's commit: step 6, docs (`data-model.md`, `roadmap.md`, `deviations.md`, `overview.md`).
 - **Open questions:** none
 - **Blockers:** none

@@ -231,8 +231,9 @@ describe("LocalInventoryStorage", () => {
     });
   });
 
-  describe("fromBrowser", () => {
-    it("returns undefined without a browser localStorage", () => {
+  describe("browser wiring", () => {
+    it("is unavailable and not created without a browser localStorage", () => {
+      expect(LocalInventoryStorage.isAvailableInBrowser()).toBe(false);
       expect(LocalInventoryStorage.fromBrowser()).toBeUndefined();
     });
   });

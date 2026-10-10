@@ -4,9 +4,14 @@
  * - `unsupported-version`: stored data has a format version this build can't read.
  * - `write-failed`: the underlying write failed (e.g. browser quota).
  * - `too-large`: the write would exceed a size budget (e.g. room metadata).
+ * - `unavailable`: the controller can't run here (e.g. no localStorage, not inside Owlbear).
  */
 export type StorageErrorCode =
-  "unreadable" | "unsupported-version" | "write-failed" | "too-large";
+  | "unreadable"
+  | "unsupported-version"
+  | "write-failed"
+  | "too-large"
+  | "unavailable";
 
 /** Error with a code the manager and UI can react to. Messages never contain stored content. */
 export class StorageError extends Error {
