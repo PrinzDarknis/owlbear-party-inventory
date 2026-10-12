@@ -57,6 +57,43 @@ describe("ItemInstance", () => {
     expect(instance.quantity).toBe(2);
   });
 
+  it("counts used pieces of a stack and derives the available amount", () => {
+    const arrows = makeItem(true);
+    const stack = ItemInstance.create(arrows.id, UNASSIGNED, 20);
+    stack.bindItem(arrows);
+    expect(stack.used).toBe(0);
+    expect(stack.available).toBe(20);
+
+    stack.used = 5;
+    expect(stack.used).toBe(5);
+    expect(stack.available).toBe(15);
+
+    stack.used = -1;
+    expect(stack.used).toBe(0);
+    stack.used = 2.4;
+    expect(stack.used).toBe(2);
+  });
+
+  it("never reports more used pieces than the quantity", () => {
+    const arrows = makeItem(true);
+    const stack = ItemInstance.create(arrows.id, UNASSIGNED, 10);
+    stack.bindItem(arrows);
+    stack.used = 8;
+    stack.quantity = 3;
+    expect(stack.used).toBe(3);
+    expect(stack.available).toBe(0);
+    expect(stack.serialize().used).toBe(3);
+  });
+
+  it("reports no used pieces for non-stackable items", () => {
+    const backpack = makeItem(false);
+    const single = ItemInstance.create(backpack.id);
+    single.bindItem(backpack);
+    single.used = 1;
+    expect(single.used).toBe(0);
+    expect(single.available).toBe(1);
+  });
+
   it("ignores binding an item with a different id", () => {
     const instance = ItemInstance.create("item-1");
     instance.bindItem(makeItem(true));
@@ -91,6 +128,7 @@ describe("ItemInstance", () => {
       alias: "Quiver arrows",
       notes: "Silvered",
       quantity: 12,
+      used: 4,
     };
     const restored = deserializeInstance(
       JSON.parse(JSON.stringify(deserializeInstance(data).serialize())),
@@ -104,7 +142,9 @@ describe("ItemInstance", () => {
     instance.bindItem(arrows);
     const copy = instance.clone();
     copy.quantity = 10;
+    copy.used = 2;
     expect(instance.quantity).toBe(3);
+    expect(instance.used).toBe(0);
     expect(copy.item).toBe(arrows);
   });
 });
@@ -125,8 +165,19 @@ describe("ItemInstance.deserialize", () => {
         alias: "  ",
         notes: 5,
         quantity: "7",
+        used: "2",
       })?.serialize(),
     ).toEqual({ id: "n1", itemId: "i1", location: UNASSIGNED, quantity: 1 });
+  });
+
+  it("reads data without used as 0 and omits used when 0", () => {
+    const instance = deserializeInstance({
+      id: "n1",
+      itemId: "i1",
+      quantity: 4,
+    });
+    expect(instance.used).toBe(0);
+    expect(instance.serialize()).not.toHaveProperty("used");
   });
 
   it("keeps valid values", () => {

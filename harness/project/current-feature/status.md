@@ -2,8 +2,8 @@
 
 Snapshot of the current state. **Overwrite** this file after each step; never append history.
 
-- **Current step:** plan approval (before step 1)
-- **Done last:** branch `feature/manager` created, `plan.md` drafted with the user's answers (delete semantics, player rights incl. `used`, view as player in the manager, clear data via registry).
-- **Next action:** user approves `plan.md`; then step 1 (`ItemInstance.used`).
-- **Open questions:** see "Open questions" in the reply to the user (use for non-stackable items, weight of used pieces).
+- **Current step:** 2. `errors/` + `state/`
+- **Done last:** step 1: `ItemInstance.used` / `available` (getter clamped, 0 for non-stackable, stored only when > 0), tests, `data-model.md`.
+- **Next action:** after the user's review and commit of step 1: `ManagerError` and `buildState`.
+- **Open questions:** none
 - **Blockers:** none

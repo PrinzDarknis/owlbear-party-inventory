@@ -10,4 +10,6 @@ export interface ItemInstanceData {
   notes?: string;
   /** Quantity; only meaningful if the item is stackable. The class getter returns 1 otherwise, `serialize` stores the raw value. */
   quantity: number;
+  /** Used pieces of a stack (≤ quantity), omitted when 0. Optional, so data without it reads as 0. */
+  used?: number;
 }

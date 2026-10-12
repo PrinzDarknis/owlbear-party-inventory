@@ -102,7 +102,7 @@ Who uses what: `state/`, `queries/`, `rules/`, `operations/` are pure and used o
 
 Check a step only when it is implemented, tested and documented.
 
-- [ ] 1. Model: `ItemInstance.used` / `available` (+ DTO, deserialize, clone, tests); `data-model.md` updated.
+- [x] 1. Model: `ItemInstance.used` / `available` (+ DTO, deserialize, clone, tests); `data-model.md` updated.
 - [ ] 2. `errors/` + `state/`: `ManagerError`, `buildState` (binding, children index, orphans/cycles) + tests.
 - [ ] 3. `queries/`: tree (children, path, owner) and totals (weight with `available`, counts) + tests.
 - [ ] 4. `rules/`: permissions table, `validateMove` (existence, `hasInventory`, cycle) + tests.

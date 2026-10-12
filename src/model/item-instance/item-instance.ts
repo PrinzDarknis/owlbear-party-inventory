@@ -35,6 +35,7 @@ export class ItemInstance implements ItemInstanceData {
   #alias: string | undefined;
   #notes: string | undefined;
   #quantity = 1;
+  #used = 0;
   #item: Item | undefined;
   // #endregion
 
@@ -102,6 +103,23 @@ export class ItemInstance implements ItemInstanceData {
   get rawQuantity(): number {
     return this.#quantity;
   }
+
+  /**
+   * Used pieces of a stack (e.g. shot arrows), counted but not removed.
+   * Always 0 for non-stackable items; never more than `quantity`.
+   */
+  get used(): number {
+    if (this.#item && !this.#item.stackable) return 0;
+    return Math.min(this.#used, this.quantity);
+  }
+  set used(value: number) {
+    this.#used = normalizeInt(value, 0, QUANTITY_MAX, this.#used);
+  }
+
+  /** Pieces still available: `quantity - used`. */
+  get available(): number {
+    return this.quantity - this.used;
+  }
   // #endregion
 
   // #region Item binding
@@ -132,6 +150,9 @@ export class ItemInstance implements ItemInstanceData {
     };
     if (this.#alias !== undefined) data.alias = this.#alias;
     if (this.#notes !== undefined) data.notes = this.#notes;
+    // Stored clamped to the stored quantity, so a lowered quantity also lowers `used`.
+    const used = Math.min(this.#used, this.#quantity);
+    if (used > 0) data.used = used;
     return data;
   }
 
@@ -150,6 +171,8 @@ export class ItemInstance implements ItemInstanceData {
     instance.notes = stringOrUndefined(value.notes);
     const quantity = numberOrUndefined(value.quantity);
     if (quantity !== undefined) instance.quantity = quantity;
+    const used = numberOrUndefined(value.used);
+    if (used !== undefined) instance.used = used;
     return instance;
   }
 
@@ -160,6 +183,7 @@ export class ItemInstance implements ItemInstanceData {
     copy.#alias = this.#alias;
     copy.#notes = this.#notes;
     copy.#quantity = this.#quantity;
+    copy.#used = this.#used;
     copy.#item = this.#item;
     return copy;
   }
