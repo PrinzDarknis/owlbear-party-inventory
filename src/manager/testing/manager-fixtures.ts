@@ -5,6 +5,7 @@ import {
   ItemLocation,
   UNASSIGNED,
 } from "../../model";
+import { StorageOperation } from "../../storage";
 import { InventoryState } from "../state/inventory-state.types";
 import { buildState } from "../state/build-state.service";
 
@@ -71,5 +72,42 @@ export function stateOf(records: StateRecords, version = 1): InventoryState {
       ),
     },
     version,
+  );
+}
+
+/**
+ * Applies operations to a state like a storage followed by a reload, so tests
+ * can check the outcome of a plan without a controller.
+ * @param state State the operations were planned on (not changed).
+ * @param operations Operations in order; later ones win.
+ * @returns The state after the operations, with the next version.
+ */
+export function stateAfter(
+  state: InventoryState,
+  operations: readonly StorageOperation[],
+): InventoryState {
+  const items = new Map(state.items);
+  const instances = new Map(state.instances);
+  const characters = new Map(state.characters);
+  for (const operation of operations) {
+    if (operation.op === "delete") {
+      if (operation.kind === "item") items.delete(operation.id);
+      else if (operation.kind === "instance") instances.delete(operation.id);
+      else characters.delete(operation.id);
+    } else if (operation.kind === "item") {
+      items.set(operation.record.id, operation.record);
+    } else if (operation.kind === "instance") {
+      instances.set(operation.record.id, operation.record);
+    } else {
+      characters.set(operation.record.id, operation.record);
+    }
+  }
+  return stateOf(
+    {
+      items: [...items.values()],
+      instances: [...instances.values()],
+      characters: [...characters.values()],
+    },
+    state.version + 1,
   );
 }
