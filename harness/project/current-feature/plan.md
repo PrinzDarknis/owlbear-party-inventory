@@ -41,7 +41,7 @@ src/manager/
   inventory-manager.ts                class: lifecycle, state owner, command queue, subscribe/version
   inventory-manager.test.ts           integration tests (memory, local, lazy-texts fake)
   errors/
-    manager-error.ts                  ManagerError with codes (not-found, forbidden, invalid-move, invalid-quantity)
+    manager-error.ts                  ManagerError with codes (not-found, forbidden, invalid-move, invalid-quantity, invalid-merge)
     index.ts
   state/                              immutable in-memory state, built from a snapshot
     inventory-state.types.ts          InventoryState: maps by id, children index, version
@@ -54,9 +54,10 @@ src/manager/
     *.test.ts
     index.ts
   rules/                              pure checks, no writes
-    permissions.types.ts              ManagerAction union, EffectiveRole
-    permissions.service.ts            can(role, action): rights table (GM / player)
-    move-rules.service.ts             validateMove: target exists, hasInventory, no cycle
+    permissions.types.ts              ManagerAction union (roles: StorageRole from the storage contract)
+    permissions.service.ts            can(role, action): rights table (GM / player); effectiveRole (view as player)
+    move-rules.service.ts             checkTarget, checkMove (for drop targets), assertMove: existence, hasInventory, no cycle
+    stack-rules.service.ts            assertSplit, assertUse, assertUnuse, assertMerge
     *.test.ts
     index.ts
   operations/                         pure builders: state + command → StorageOperation[]
@@ -88,7 +89,7 @@ Who uses what: `state/`, `queries/`, `rules/`, `operations/` are pure and used o
 | Inconsistent data        | Instances with a missing item, a dangling location or a cycle are shown as **unassigned** in the tree (view-level only). The manager never writes repairs on its own: with N clients that would cause write loops; the next user action on the record stores the corrected location.                                                                                   |
 | Command flow             | Commands run **one at a time** (queue). Each: check rights → validate → build operations from the current state → one `apply` → await the reload before the next command. No optimistic state.                                                                                                                                                                         |
 | Multi-user conflicts     | Last writer wins per record (Owlbear stores one key per record). Accepted for v1; documented in `known-issues.md` when phase 5 measures it.                                                                                                                                                                                                                            |
-| Errors                   | Rule violations reject with `ManagerError` (`not-found`, `forbidden`, `invalid-move`, `invalid-quantity`). Storage failures reject with the original `StorageError`; `load` failures also set status `error` (with the code), never swallowed.                                                                                                                         |
+| Errors                   | Rule violations reject with `ManagerError` (`not-found`, `forbidden`, `invalid-move`, `invalid-quantity`, `invalid-merge`). Storage failures reject with the original `StorageError`; `load` failures also set status `error` (with the code), never swallowed.                                                                                                        |
 | Delete semantics         | Character → its direct instances become `unassigned` (containers keep their contents). Container instance → its contents move to the container's location. Item definition → all its instances are deleted; their contents move to the **nearest surviving** location (walk up past deleted containers). One `apply` each.                                             |
 | Player rights (v1)       | Player: move instances, split, merge, **use**, write player notes. GM: everything, plus unuse, set quantity, delete, assign, catalog, characters. UX only, not security (`harness/core/05-security.md`).                                                                                                                                                               |
 | View as player           | Lives in the manager: `effectiveRole` = `PLAYER` if the GM enables it, else the storage role. All rights checks use it; `can(action)` is exposed for the UI. Enabling it as a player is a no-op.                                                                                                                                                                       |
@@ -105,7 +106,7 @@ Check a step only when it is implemented, tested and documented.
 - [x] 1. Model: `ItemInstance.used` / `available` (+ DTO, deserialize, clone, tests); `data-model.md` updated.
 - [x] 2. `errors/` + `state/`: `ManagerError`, `buildState` (binding, contents index, orphans/cycles, `misplaced`) + tests; `testing/manager-fixtures.ts` (shared by steps 2–7).
 - [x] 3. `queries/`: tree (`contentsOf`, `pathOf`, `ownerOf`, `isWithin`, `descendantsOf`) and totals (`instanceWeight` / `totalWeight` with `available`, rounded once; `instanceCount`) + tests.
-- [ ] 4. `rules/`: permissions table, `validateMove` (existence, `hasInventory`, cycle) + tests.
+- [x] 4. `rules/`: `ManagerAction` + `can` / `effectiveRole`, `checkTarget` / `checkMove` / `assertMove` (existence, `hasInventory`, no cycle), stack rules (split, use, unuse, merge) + tests.
 - [ ] 5. `operations/`: builders for all commands incl. re-homing, split/merge, use/unuse + tests.
 - [ ] 6. `texts/` + `testing/`: text cache, lazy-texts fake storage + tests.
 - [ ] 7. `InventoryManager`: lifecycle, status, version/subscribe, queue, reload on changes, role + view as player, commands, error surfacing + integration tests (memory, local, lazy fake).

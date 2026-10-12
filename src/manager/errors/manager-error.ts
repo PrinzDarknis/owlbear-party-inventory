@@ -3,10 +3,15 @@
  * - `not-found`: a referenced record doesn't exist (any more).
  * - `forbidden`: the effective role may not run the command (UX, not security).
  * - `invalid-move`: the target location doesn't exist, can't hold items or would create a cycle.
- * - `invalid-quantity`: the quantity is out of range for the command.
+ * - `invalid-quantity`: the quantity is out of range for the command, or the item isn't stackable.
+ * - `invalid-merge`: the stacks can't be merged (same instance, different items or locations).
  */
 export type ManagerErrorCode =
-  "not-found" | "forbidden" | "invalid-move" | "invalid-quantity";
+  | "not-found"
+  | "forbidden"
+  | "invalid-move"
+  | "invalid-quantity"
+  | "invalid-merge";
 
 /** Rule violation of a manager command. Messages never contain user-entered text. */
 export class ManagerError extends Error {
