@@ -1,10 +1,12 @@
 # 04 – Conventions
 
 ## Language
+
 - **Code, identifiers, comments, commit messages, UI strings: English.** Spell identifiers correctly. Public identifiers are hard to rename later.
 - UI strings live next to the component. If i18n is introduced later, extract them then; do not prepare half an i18n layer.
 
 ## Project layout
+
 ```
 html/
   <context>.html                        one per Owlbear iframe context (see 02-architecture)
@@ -31,6 +33,7 @@ src/
 ```
 
 ### Folder structure rules
+
 - **Group by responsibility, never by "everything of this module".** A module folder (e.g. a storage or manager layer) gets one sub-folder per role: contracts/interfaces, shared internals, one folder per implementation (controller, backend, adapter), wiring (registry, factory) and test-only helpers. A flat catch-all folder is not acceptable.
 - **Plan the structure before the first file.** Every feature plan (`current-feature/plan.md` → Structure) shows the target tree of the folders it creates or extends. Files are created in their final place from the start, not moved there later.
 - **Plan a layer as a whole.** Design the structure and contract of a layer for **all** implementations known from the roadmap (including later phases), not only for the step at hand. For each part, name who uses it: code used by one implementation lives in that implementation's folder (e.g. its persisted format under `dto/`); only code used by several goes to a `shared/` folder. Decide where state lives (exactly one owner) before adding caches or change events.
@@ -39,11 +42,13 @@ src/
 - Test-only helpers (contract suites, fakes) live in a `testing/` folder of their module and are never imported by app code.
 
 ## File naming
+
 - **kebab-case** file and folder names.
 - Suffixes: `.component.tsx`, `.hook.ts`, `.service.ts`, `.types.ts`, `.default.ts`, `.parse.ts`, `.constant.ts`, `.enum.ts`, `.test.ts`, `.mockdata.ts`, `.storage.ts` (a class implementing a storage/backend interface), `.registry.ts` (list of selectable implementations), `.contract.ts` (shared test suite every implementation of an interface must pass; lives in `testing/`).
 - Every folder that is imported from elsewhere has an `index.ts` barrel.
 
 ## TypeScript
+
 - **Named exports only.** No `export default` in `src/` (config files like `vite.config.ts` excepted).
 - `type` for unions, mapped and utility types. `interface` for object shapes (props, models). **No `I` prefix.**
 - Props type: `<ComponentName>Props`. Hook return types are explicit.
@@ -67,6 +72,7 @@ src/
 - A class that corresponds to an interface **always declares it with `implements`** (`class Item implements ItemData`), so the compiler keeps both in sync. Fields that the class only exposes read-only are `readonly` in the interface.
 
 ## Models
+
 A model is either a **plain type** (interface/type plus a parser) or a **class** (with a JSON DTO interface). Choose the class when the model has behavior, invariants or accessors; otherwise keep the plain type.
 
 Naming: plain types are **parsed** (`parse<Name>(value: unknown)`), class objects are **serialized** (`serialize()` / `static deserialize(value: unknown)`).
@@ -82,6 +88,7 @@ Naming: plain types are **parsed** (`parse<Name>(value: unknown)`), class object
   - Storage, sync and import code hand raw data to `<Class>.deserialize` and write `instance.serialize()`.
 
 ## React
+
 - **Function components + hooks only.** Template: [`templates/component`](../templates/component/).
 - State close to its use. Lift it only when shared. For cross-iframe sharing use metadata or broadcast, not React context.
 - Every effect that subscribes to OBR **returns the unsubscribe**:
@@ -105,17 +112,37 @@ Naming: plain types are **parsed** (`parse<Name>(value: unknown)`), class object
 - Generic hooks (OBR ready, role, theme, room metadata) are in [`templates/hooks`](../templates/hooks/). Copy them to `src/hooks/` at project start.
 
 ## CSS
+
 - One CSS file per component, imported at the top of the component.
 - Class names: kebab-case, root class = component folder name (`.dice-roller`), children BEM-like (`.dice-roller__result`, `.dice-roller--active`).
 - Colors and spacings come from CSS variables in `src/index.css` (fed by `OBR.theme`). No inline styles except dynamic values.
 - Icons: SVG in `public/icons/`. Tint them with CSS filters or `currentColor`.
 
 ## Comments and docs
-- Comment the **why**, not the what. JSDoc on every exported function of `src/obr/` and `src/model/`.
+
+- Comment the **why**, not the what.
+- **JSDoc** on every exported function, every public method and constructor of an exported class, and every hook (React components are documented through their props interface). A complete doc comment has:
+  - a summary sentence (what it is for, and why if it isn't obvious),
+  - `@param <name>` for **every** parameter: meaning, unit, allowed range, default,
+  - `@returns` for every non-`void` result; for a promise, what it resolves to,
+  - `@throws` for every error a caller should handle; for a promise, what it rejects with (e.g. ``@throws {StorageError} `unreadable` if the stored data can't be parsed``).
+
+  Accessors, fields, types and constants get the summary only. Fields of object parameters are documented on their interface, not as `@param options.x`. Private helpers don't need JSDoc; if they have one, it follows the same format.
+
+  ```ts
+  /**
+   * Builds the manager state from a freshly loaded snapshot.
+   * @param snapshot Records from `load()`; the state takes ownership of them.
+   * @param version Version of the new state, higher than the previous one.
+   * @returns The new state with every instance bound to its item.
+   */
+  ```
+
 - Short section markers in larger files are fine (`// handlers`, `// render`).
 - Every feature that adds metadata keys, broadcast channels or storage keys updates `harness/project/data-model.md`.
 
 ## Git
+
 - Branch per feature or fix: `feature/<slug>`, `fix/<slug>`, `chore/<slug>`. The default branch (`main`/`master`) stays deployable.
 - A feature branch holds a **complete feature** with all its steps; it is merged only when the feature is finished and `harness/project/current-feature/` is empty again (see [07 §Feature lifecycle](07-workflow.md#feature-lifecycle-harnessprojectcurrent-feature)).
 - Commit messages: `type(scope): summary` (Conventional Commits). Types: `feat`, `fix`, `refactor`, `style`, `docs`, `chore`, `build`. Imperative, lowercase summary, ≤ 72 chars.

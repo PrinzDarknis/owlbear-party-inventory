@@ -103,11 +103,11 @@ Who uses what: `state/`, `queries/`, `rules/`, `operations/` are pure and used o
 Check a step only when it is implemented, tested and documented.
 
 - [x] 1. Model: `ItemInstance.used` / `available` (+ DTO, deserialize, clone, tests); `data-model.md` updated.
-- [ ] 2. `errors/` + `state/`: `ManagerError`, `buildState` (binding, children index, orphans/cycles) + tests.
+- [x] 2. `errors/` + `state/`: `ManagerError`, `buildState` (binding, contents index, orphans/cycles, `misplaced`) + tests; `testing/manager-fixtures.ts` (shared by steps 2–7).
 - [ ] 3. `queries/`: tree (children, path, owner) and totals (weight with `available`, counts) + tests.
 - [ ] 4. `rules/`: permissions table, `validateMove` (existence, `hasInventory`, cycle) + tests.
 - [ ] 5. `operations/`: builders for all commands incl. re-homing, split/merge, use/unuse + tests.
-- [ ] 6. `texts/` + `testing/`: text cache, lazy-texts fake storage, fixtures + tests.
+- [ ] 6. `texts/` + `testing/`: text cache, lazy-texts fake storage + tests.
 - [ ] 7. `InventoryManager`: lifecycle, status, version/subscribe, queue, reload on changes, role + view as player, commands, error surfacing + integration tests (memory, local, lazy fake).
 - [ ] 8. Registry `clearData()` (#3) and `manager.clearData()` + tests; remove #3 from `known-issues.md`.
 - [ ] 9. Docs: `data-model.md` (manager section, `used`), `overview.md`, roadmap status.

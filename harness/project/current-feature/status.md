@@ -2,8 +2,8 @@
 
 Snapshot of the current state. **Overwrite** this file after each step; never append history.
 
-- **Current step:** 2. `errors/` + `state/`
-- **Done last:** step 1: `ItemInstance.used` / `available` (getter clamped, 0 for non-stackable, stored only when > 0), tests, `data-model.md`.
-- **Next action:** after the user's review and commit of step 1: `ManagerError` and `buildState`.
+- **Current step:** 3. `queries/`
+- **Done last:** step 2: `ManagerError`, `InventoryState` + `buildState` (item binding, contents per location key, invalid locations and cycles shown as unassigned and listed in `misplaced`, no repair writes), test fixtures.
+- **Next action:** after the user's review and commit of step 2: tree queries (children, path, owner) and totals (weight with `available`, counts).
 - **Open questions:** none
 - **Blockers:** none
