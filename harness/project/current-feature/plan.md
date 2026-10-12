@@ -49,8 +49,8 @@ src/manager/
     build-state.service.test.ts
     index.ts
   queries/                            pure reads on InventoryState
-    tree.service.ts                   childrenOf(location), pathOf(instanceId), ownerOf(instanceId)
-    totals.service.ts                 totalWeight(location | instance), instanceCount(itemId)
+    tree.service.ts                   contentsOf, pathOf, ownerOf, isWithin, descendantsOf
+    totals.service.ts                 instanceWeight, totalWeight, instanceCount
     *.test.ts
     index.ts
   rules/                              pure checks, no writes
@@ -104,7 +104,7 @@ Check a step only when it is implemented, tested and documented.
 
 - [x] 1. Model: `ItemInstance.used` / `available` (+ DTO, deserialize, clone, tests); `data-model.md` updated.
 - [x] 2. `errors/` + `state/`: `ManagerError`, `buildState` (binding, contents index, orphans/cycles, `misplaced`) + tests; `testing/manager-fixtures.ts` (shared by steps 2–7).
-- [ ] 3. `queries/`: tree (children, path, owner) and totals (weight with `available`, counts) + tests.
+- [x] 3. `queries/`: tree (`contentsOf`, `pathOf`, `ownerOf`, `isWithin`, `descendantsOf`) and totals (`instanceWeight` / `totalWeight` with `available`, rounded once; `instanceCount`) + tests.
 - [ ] 4. `rules/`: permissions table, `validateMove` (existence, `hasInventory`, cycle) + tests.
 - [ ] 5. `operations/`: builders for all commands incl. re-homing, split/merge, use/unuse + tests.
 - [ ] 6. `texts/` + `testing/`: text cache, lazy-texts fake storage + tests.
