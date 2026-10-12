@@ -72,12 +72,13 @@ src/manager/
     *.test.ts
     index.ts
   texts/
-    text-cache.ts                     loaded texts per TextRef, loading state, invalidation on `texts` changes
+    text-entry.types.ts               TextEntry (status, last texts, error), TextLoader
+    text-cache.ts                     TextCache: get, ensure (shared loads, retry after error), loadedTexts, remember, refresh, retain; stale results ignored
     text-cache.test.ts
     index.ts
   testing/                            test-only, never imported by app code
-    lazy-texts-memory.storage.ts      memory controller with `lazyTexts: true` (stand-in for Owlbear)
-    manager-fixtures.ts               sample inventory builders
+    lazy-texts-memory.storage.ts      memory controller with `lazyTexts: true` (stand-in for Owlbear): hold/fail text loads, simulate texts and role changes
+    manager-fixtures.ts               makeItem, makeInstance, stateOf, stateAfter
     index.ts
 ```
 
@@ -112,7 +113,7 @@ Check a step only when it is implemented, tested and documented.
 - [x] 3. `queries/`: tree (`contentsOf`, `pathOf`, `ownerOf`, `isWithin`, `descendantsOf`) and totals (`instanceWeight` / `totalWeight` with `available`, rounded once; `instanceCount`) + tests.
 - [x] 4. `rules/`: `ManagerAction` + `can` / `effectiveRole`, `checkTarget` / `checkMove` / `assertMove` (existence, `hasInventory`, no cycle), stack rules (split, use, unuse, merge) + tests.
 - [x] 5. `operations/`: plan builders for all commands (re-homing, hasInventory off, split/merge, use/unuse, write notes), `OperationPlanBuilder`, `fillTexts` + tests; `stateAfter` fixture.
-- [ ] 6. `texts/` + `testing/`: text cache, lazy-texts fake storage + tests.
+- [x] 6. `texts/` + `testing/`: `TextCache` (on-demand loads, refresh on `texts` changes, drop on delete, generation guard) and `LazyTextsMemoryStorage` (passes the storage contract) + tests; contract suite fixed for lazy instance notes.
 - [ ] 7. `InventoryManager`: lifecycle, status, version/subscribe, queue, reload on changes, role + view as player, commands, error surfacing + integration tests (memory, local, lazy fake).
 - [ ] 8. Registry `clearData()` (#3) and `manager.clearData()` + tests; remove #3 from `known-issues.md`.
 - [ ] 9. Docs: `data-model.md` (manager section, `used`), `overview.md`, roadmap status.

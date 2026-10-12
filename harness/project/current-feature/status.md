@@ -2,8 +2,8 @@
 
 Snapshot of the current state. **Overwrite** this file after each step; never append history.
 
-- **Current step:** 6. `texts/` + `testing/`
-- **Done last:** step 5: `operations/` (pure plan builders for every command, `textsFromState` + `fillTexts` for lazy texts, re-homing incl. `hasInventory` off) + tests.
-- **Next action:** after the user's review and commit of step 5: text cache (load on demand, refetch on `texts` changes, drop on delete) and the lazy-texts memory storage fake.
+- **Current step:** 7. `InventoryManager`
+- **Done last:** step 6: `TextCache` and `LazyTextsMemoryStorage` (+ tests); the storage contract suite no longer expects instance notes from `load()` of lazy controllers.
+- **Next action:** after the user's review and commit of step 6: the `InventoryManager` class (lifecycle, status, version/subscribe, command queue, reload on changes, role + view as player, commands with text loading, error surfacing) and its integration tests; `src/manager/index.ts`.
 - **Open questions:** none
 - **Blockers:** none

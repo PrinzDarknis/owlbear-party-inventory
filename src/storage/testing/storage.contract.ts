@@ -64,8 +64,11 @@ export function describeStorageContract(
       const snapshot = await storage.load();
 
       expect(snapshot.items.map((entry) => entry.id)).toEqual([item.id]);
+      // Lazy controllers omit long texts on load; `loadTexts` is tested separately.
+      const expectedInstance = instance.serialize();
+      if (storage.capabilities.lazyTexts) delete expectedInstance.notes;
       expect(snapshot.instances.map((entry) => entry.serialize())).toEqual([
-        instance.serialize(),
+        expectedInstance,
       ]);
       expect(snapshot.characters.map((entry) => entry.serialize())).toEqual([
         character.serialize(),
