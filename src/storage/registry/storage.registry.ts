@@ -15,6 +15,18 @@ const LOCAL_BACKEND: StorageBackend = {
     }
     return storage;
   },
+  clearData: async () => {
+    // A separate controller: the data may be unreadable, which `clear` allows.
+    const storage = LocalInventoryStorage.fromBrowser();
+    if (!storage) {
+      throw new StorageError("unavailable", "localStorage is not available");
+    }
+    try {
+      await storage.clear();
+    } finally {
+      storage.dispose();
+    }
+  },
 };
 
 const MEMORY_BACKEND: StorageBackend = {

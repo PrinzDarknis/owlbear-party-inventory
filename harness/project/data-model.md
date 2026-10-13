@@ -64,11 +64,11 @@ Budget: `ROOM_METADATA_BUDGET_BYTES` (8 KB) for all keys together.
 
 ## localStorage
 
-| Key                                                    | Content                                                                                                                                   | Deletion path                                                      |
-| ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| `LOCAL_INVENTORY_KEY` = `${PLUGIN_ID}/local/inventory` | full inventory of the local controller: `LocalInventoryDto` `{ version, items, instances, characters }` (records as `serialize()` output) | `LocalInventoryStorage.clear()` ("Clear local data" UI in phase 4) |
-| `LOCAL_PROBE_KEY` = `${PLUGIN_ID}/local/probe`         | `"1"`, written and removed immediately to test availability                                                                               | removed by the probe itself                                        |
-| _planned:_ `${PLUGIN_ID}/texts/<roomId>/<i\|n>/<id>`   | long texts (GM browser = source, players = cache)                                                                                         | "Clear local data" action                                          |
+| Key                                                    | Content                                                                                                                                   | Deletion path                                                                                                                      |
+| ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `LOCAL_INVENTORY_KEY` = `${PLUGIN_ID}/local/inventory` | full inventory of the local controller: `LocalInventoryDto` `{ version, items, instances, characters }` (records as `serialize()` output) | `InventoryManager.clearData()` → registry entry `clearData()` → `LocalInventoryStorage.clear()` ("Clear local data" UI in phase 4) |
+| `LOCAL_PROBE_KEY` = `${PLUGIN_ID}/local/probe`         | `"1"`, written and removed immediately to test availability                                                                               | removed by the probe itself                                                                                                        |
+| _planned:_ `${PLUGIN_ID}/texts/<roomId>/<i\|n>/<id>`   | long texts (GM browser = source, players = cache)                                                                                         | "Clear local data" action                                                                                                          |
 
 ## Migrations
 

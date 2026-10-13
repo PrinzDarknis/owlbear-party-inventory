@@ -138,6 +138,14 @@ export class TextCache {
     if (changed) this.#onChange();
   }
 
+  /** Drops all entries and ignores running loads, e.g. after local data was cleared. */
+  clear(): void {
+    if (this.#slots.size === 0) return;
+    // Running loads find no slot with their generation and are ignored.
+    this.#slots.clear();
+    this.#onChange();
+  }
+
   /** Drops all entries and ignores running loads. Later calls do nothing. */
   dispose(): void {
     this.#disposed = true;

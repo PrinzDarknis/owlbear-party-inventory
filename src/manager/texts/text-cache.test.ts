@@ -170,6 +170,27 @@ describe("TextCache", () => {
     expect(onChange).toHaveBeenCalledTimes(1);
   });
 
+  it("clears all entries and ignores running loads", async () => {
+    const { calls, loader } = controlledLoader();
+    const onChange = vi.fn();
+    const cache = new TextCache(loader, onChange);
+    cache.remember(COIL, { notes: "Knotted." });
+    const pending = cache.ensure(ROPE);
+    await flush();
+    onChange.mockClear();
+
+    cache.clear();
+    expect(cache.get(COIL)).toBeUndefined();
+    expect(onChange).toHaveBeenCalledTimes(1);
+    calls[0]?.resolve({ description: "Late." });
+    await flush();
+
+    // The waiting ensure starts a new load instead of taking the stale result.
+    expect(calls).toHaveLength(2);
+    calls[1]?.resolve({ description: "Fresh." });
+    await expect(pending).resolves.toEqual({ description: "Fresh." });
+  });
+
   it("throws for texts that are not loaded", () => {
     const cache = new TextCache(fixedLoader().loader, () => {});
 

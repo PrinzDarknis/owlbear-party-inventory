@@ -4,6 +4,7 @@ import {
   StorageBackend,
   StorageCapabilities,
   StorageChange,
+  StorageError,
   StorageRole,
   TextRef,
   TextsFor,
@@ -69,6 +70,7 @@ import {
 export class InventoryManager {
   // #region Fields
   readonly #storage: InventoryStorage;
+  readonly #backend: StorageBackend | undefined;
   readonly #texts: TextCache;
   readonly #listeners = new Set<() => void>();
   readonly #memo = new Map<string, unknown>();
@@ -89,9 +91,12 @@ export class InventoryManager {
    * Wraps a storage controller and subscribes to its changes. Call `start()`
    * (or use `open`) before using the manager.
    * @param storage Controller to read from and write to; the manager disposes it.
+   * @param backend Registry entry `storage` was created from; enables
+   *   `clearData` if the entry offers it.
    */
-  constructor(storage: InventoryStorage) {
+  constructor(storage: InventoryStorage, backend?: StorageBackend) {
     this.#storage = storage;
+    this.#backend = backend;
     this.#texts = new TextCache(
       (ref) => this.#storage.loadTexts(ref),
       () => this.#bump(),
@@ -106,7 +111,7 @@ export class InventoryManager {
    * @throws {StorageError} `unavailable` if the controller can't run here (rejects).
    */
   static async open(backend: StorageBackend): Promise<InventoryManager> {
-    const manager = new InventoryManager(await backend.create());
+    const manager = new InventoryManager(await backend.create(), backend);
     await manager.start();
     return manager;
   }
@@ -126,6 +131,11 @@ export class InventoryManager {
   /** What the storage can do (persistent, lazy texts, multi-user). */
   get capabilities(): StorageCapabilities {
     return this.#storage.capabilities;
+  }
+
+  /** Whether `clearData` can delete this storage's data in this browser. */
+  get canClearData(): boolean {
+    return this.#backend?.clearData !== undefined;
   }
 
   /** Role reported by the storage. */
@@ -616,6 +626,29 @@ export class InventoryManager {
     return this.#reload();
   }
 
+  /**
+   * Deletes this storage's data in this browser ("clear local data") and
+   * reloads. Allowed for every role and in status `error`: it is the way out
+   * of unreadable data and only affects this browser. Runs after pending
+   * commands.
+   * @returns Resolves when the state reflects the cleared storage.
+   * @throws {StorageError} `unavailable` if the storage offers no deletion
+   *   (see `canClearData`), or the error of the deletion (rejects).
+   * @throws {Error} If the manager is disposed (rejects).
+   */
+  clearData(): Promise<void> {
+    return this.#enqueue(async () => {
+      if (this.#disposed) throw new Error("Inventory manager disposed");
+      const clear = this.#backend?.clearData;
+      if (!clear) {
+        throw new StorageError("unavailable", "Storage has no local data");
+      }
+      await clear.call(this.#backend);
+      this.#texts.clear();
+      await this.#reload();
+    });
+  }
+
   /** Stops listening, disposes the storage and rejects later commands. */
   dispose(): void {
     if (this.#disposed) return;
@@ -668,7 +701,18 @@ export class InventoryManager {
       await this.#reload();
       return plan.result;
     };
-    const run = this.#commandTail.then(command);
+    return this.#enqueue(command);
+  }
+
+  /**
+   * Runs a task after every previously queued task has settled, so commands
+   * never build on a state another command is about to change.
+   * @param task Work to run; its failure doesn't stop later tasks.
+   * @returns The task's result.
+   * @throws {unknown} Whatever the task rejects with (rejects).
+   */
+  #enqueue<Result>(task: () => Promise<Result>): Promise<Result> {
+    const run = this.#commandTail.then(task);
     this.#commandTail = run.catch(() => undefined);
     return run;
   }

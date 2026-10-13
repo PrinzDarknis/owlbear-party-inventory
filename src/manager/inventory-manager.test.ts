@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { atCharacter, inInstance } from "../model";
-import { StorageError } from "../storage";
+import { StorageBackend, StorageError } from "../storage";
 import {
   LOCAL_INVENTORY_KEY,
   LocalInventoryStorage,
@@ -409,5 +409,85 @@ describe("InventoryManager: lazy texts", () => {
 
     await manager.deleteItem(rope.id);
     expect(manager.texts(ref)).toBeUndefined();
+  });
+});
+
+describe("InventoryManager: clear local data", () => {
+  // Local registry entry on a fake web storage, like the real one in the browser.
+  function localBackend(web: FakeWebStorage): StorageBackend {
+    return {
+      id: "local",
+      label: "Browser storage",
+      isAvailable: async () => true,
+      create: async () => new LocalInventoryStorage(web),
+      clearData: () => new LocalInventoryStorage(web).clear(),
+    };
+  }
+
+  it("deletes unreadable data and recovers from the error status", async () => {
+    const web = new FakeWebStorage();
+    web.poke(LOCAL_INVENTORY_KEY, "{not json");
+    const manager = await InventoryManager.open(localBackend(web));
+    expect(manager.status.type).toBe("error");
+    expect(manager.canClearData).toBe(true);
+
+    await manager.clearData();
+
+    expect(manager.status).toEqual({ type: "ready" });
+    expect(web.peek(LOCAL_INVENTORY_KEY)).toBeUndefined();
+    await manager.createCharacter("Mira");
+    expect(manager.characters()).toHaveLength(1);
+  });
+
+  it("runs after pending commands", async () => {
+    const web = new FakeWebStorage();
+    const manager = await InventoryManager.open(localBackend(web));
+    const created = manager.createCharacter("Mira");
+
+    await manager.clearData();
+
+    await expect(created).resolves.toBeDefined();
+    expect(manager.characters()).toEqual([]);
+  });
+
+  it("is allowed while viewing as player", async () => {
+    const web = new FakeWebStorage();
+    const manager = await InventoryManager.open(localBackend(web));
+    await manager.createCharacter("Mira");
+    manager.setViewAsPlayer(true);
+
+    await manager.clearData();
+
+    expect(manager.characters()).toEqual([]);
+  });
+
+  it("rejects for storages without local data", async () => {
+    const { manager } = await memoryManager();
+
+    expect(manager.canClearData).toBe(false);
+    const error = await manager.clearData().then(
+      () => undefined,
+      (reason: unknown) => reason,
+    );
+    expect(error instanceof StorageError && error.code).toBe("unavailable");
+  });
+
+  it("drops cached texts", async () => {
+    const storage = new LazyTextsMemoryStorage();
+    const manager = new InventoryManager(storage, {
+      id: storage.id,
+      label: "Lazy",
+      isAvailable: async () => true,
+      create: async () => storage,
+      clearData: async () => {},
+    });
+    await manager.start();
+    const rope = await manager.createItem("Rope", (item) => {
+      item.description = "Hempen.";
+    });
+
+    await manager.clearData();
+
+    expect(manager.texts({ kind: "item", id: rope.id })).toBeUndefined();
   });
 });

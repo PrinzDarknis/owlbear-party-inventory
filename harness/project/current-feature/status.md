@@ -2,8 +2,8 @@
 
 Snapshot of the current state. **Overwrite** this file after each step; never append history.
 
-- **Current step:** 8. Registry `clearData()` (#3)
-- **Done last:** step 7: `InventoryManager` with public barrel `src/manager/index.ts` and integration tests against memory, local (fake web storage) and the lazy-texts fake.
-- **Next action:** after the user's review and commit of step 7: optional `clearData()` on `StorageBackend` (local entry → `LocalInventoryStorage.clear()`), `InventoryManager` keeps its registry entry and exposes `clearData()` + reload; remove known issue #3.
+- **Current step:** 9. Docs
+- **Done last:** step 8: optional `clearData()` on `StorageBackend` (local entry), `InventoryManager.clearData()` / `canClearData`, `TextCache.clear()` + tests; known issue #3 removed, deletion path in `data-model.md` updated.
+- **Next action:** after the user's review and commit of step 8: `data-model.md` manager section, `overview.md`, roadmap status (phase 3 done, inputs for phase 4); then finish the feature.
 - **Open questions:** none
 - **Blockers:** none

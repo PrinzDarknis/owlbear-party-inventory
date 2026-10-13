@@ -38,7 +38,7 @@ src/storage/registry/
 
 src/manager/
   index.ts                            public API: InventoryManager, ManagerStatus, ManagerError, ManagerAction, TextEntry
-  inventory-manager.ts                class: lifecycle (open/start/dispose), status, version/subscribe, queries (memoized per version), texts, commands (queue), reload on changes
+  inventory-manager.ts                class: lifecycle (open/start/reload/clearData/dispose), status, version/subscribe, queries (memoized per version), texts, commands (queue), reload on changes
   inventory-manager.types.ts          ManagerStatus (loading / ready / error)
   inventory-manager.test.ts           integration tests (memory, local, lazy-texts fake)
   errors/
@@ -119,7 +119,7 @@ Check a step only when it is implemented, tested and documented.
 - [x] 5. `operations/`: plan builders for all commands (re-homing, hasInventory off, split/merge, use/unuse, write notes), `OperationPlanBuilder`, `fillTexts` + tests; `stateAfter` fixture.
 - [x] 6. `texts/` + `testing/`: `TextCache` (on-demand loads, refresh on `texts` changes, drop on delete, generation guard) and `LazyTextsMemoryStorage` (passes the storage contract) + tests; contract suite fixed for lazy instance notes.
 - [x] 7. `InventoryManager`: lifecycle, status, version/subscribe, memoized queries, queue, reload on changes, role + view as player, commands with text loading, error surfacing + integration tests (memory, local, lazy fake); `src/manager/index.ts`.
-- [ ] 8. Registry `clearData()` (#3) and `manager.clearData()` + tests; remove #3 from `known-issues.md`.
+- [x] 8. Registry `clearData()` (local entry; memory has none) and `InventoryManager.clearData()` / `canClearData` (queued, allowed for every role and in status `error`, clears the text cache, reloads) + tests; known issue #3 removed.
 - [ ] 9. Docs: `data-model.md` (manager section, `used`), `overview.md`, roadmap status.
 - [ ] Finish: lasting knowledge moved to `harness/project/*`, `current-feature/` emptied, merge after asking
 

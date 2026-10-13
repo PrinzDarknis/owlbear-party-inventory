@@ -10,4 +10,10 @@ export interface StorageBackend {
   isAvailable(): Promise<boolean>;
   /** Creates the controller; rejects with `StorageError` `unavailable` if it can't run. */
   create(): Promise<InventoryStorage>;
+  /**
+   * Deletes this backend's data in this browser ("clear local data"),
+   * including data that can't be read. Missing if the backend keeps nothing
+   * in the browser. Rejects with `StorageError` (`unavailable`, `write-failed`).
+   */
+  clearData?(): Promise<void>;
 }

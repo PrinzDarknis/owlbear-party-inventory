@@ -1,8 +1,9 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { StorageError } from "../interface";
-import { LOCAL_STORAGE_ID } from "../backends/local";
+import { LOCAL_INVENTORY_KEY, LOCAL_STORAGE_ID } from "../backends/local";
 import { MEMORY_STORAGE_ID } from "../backends/memory";
+import { FakeWebStorage } from "../testing";
 
 import { findStorageBackend, STORAGE_BACKENDS } from "./storage.registry";
 
@@ -42,6 +43,40 @@ describe("STORAGE_BACKENDS", () => {
     );
     expect(error).toBeInstanceOf(StorageError);
     expect(error instanceof StorageError && error.code).toBe("unavailable");
+  });
+});
+
+describe("clearData", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("deletes the local inventory, even if it can't be read", async () => {
+    const web = new FakeWebStorage();
+    web.poke(LOCAL_INVENTORY_KEY, "{not json");
+    vi.stubGlobal("window", {
+      localStorage: web,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+    });
+
+    await findStorageBackend(LOCAL_STORAGE_ID)?.clearData?.();
+
+    expect(web.peek(LOCAL_INVENTORY_KEY)).toBeUndefined();
+  });
+
+  it("rejects without localStorage", async () => {
+    const local = findStorageBackend(LOCAL_STORAGE_ID);
+
+    const error = await local?.clearData?.().then(
+      () => undefined,
+      (reason: unknown) => reason,
+    );
+    expect(error instanceof StorageError && error.code).toBe("unavailable");
+  });
+
+  it("is not offered by memory, which keeps nothing in the browser", () => {
+    expect(findStorageBackend(MEMORY_STORAGE_ID)?.clearData).toBeUndefined();
   });
 });
 
