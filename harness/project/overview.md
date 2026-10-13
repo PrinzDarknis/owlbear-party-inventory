@@ -8,18 +8,19 @@ The plugin runs inside Owlbear (Owlbear storage, multi-user) and also as a stand
 
 ## Features
 
-| Feature                                                                         | Who                                                 | Where (UI / background)  | Main code                                                              |
-| ------------------------------------------------------------------------------- | --------------------------------------------------- | ------------------------ | ---------------------------------------------------------------------- |
-| Storage selection on start (auto Owlbear inside Owlbear)                        | both                                                | popover / standalone tab | `src/components/storage-select/` (planned), `src/storage/registry/`    |
-| Storage controllers: memory, local (localStorage, cross-tab), Owlbear (phase 5) | both                                                | popover / standalone tab | `src/storage/`                                                         |
-| Character tabs with recursive inventory                                         | both (view), players move instances and write notes | popover                  | `src/components/character-tab/`, `src/components/inventory/` (planned) |
-| Item catalog: create, edit, delete definitions, assign instances                | GM                                                  | popover, GM tab          | `src/components/dm/` (planned)                                         |
-| GM text server (descriptions, notes)                                            | GM client                                           | background               | `src/storage/backends/owlbear/text-server/` (planned, phase 5)         |
+| Feature                                                                                    | Who                                                 | Where (UI / background)  | Main code                                                              |
+| ------------------------------------------------------------------------------------------ | --------------------------------------------------- | ------------------------ | ---------------------------------------------------------------------- |
+| Storage selection on start (auto Owlbear inside Owlbear)                                   | both                                                | popover / standalone tab | `src/components/storage-select/` (planned), `src/storage/registry/`    |
+| Storage controllers: memory, local (localStorage, cross-tab), Owlbear (phase 5)            | both                                                | popover / standalone tab | `src/storage/`                                                         |
+| Inventory manager: state, tree, weight, rights, commands, view as player, clear local data | both                                                | popover / standalone tab | `src/manager/`                                                         |
+| Character tabs with recursive inventory                                                    | both (view), players move instances and write notes | popover                  | `src/components/character-tab/`, `src/components/inventory/` (planned) |
+| Item catalog: create, edit, delete definitions, assign instances                           | GM                                                  | popover, GM tab          | `src/components/dm/` (planned)                                         |
+| GM text server (descriptions, notes)                                                       | GM client                                           | background               | `src/storage/backends/owlbear/text-server/` (planned, phase 5)         |
 
 ## Roles
 
-- GM: manages characters and item definitions, creates and deletes instances, changes quantities, sees and edits GM notes.
-- Player: sees all inventories, moves instances between characters and containers, writes player notes on instances.
+- GM: manages characters and item definitions, creates and deletes instances, changes quantities, undoes uses, sees and edits GM notes.
+- Player: sees all inventories, moves instances between characters and containers (whole or partial stacks), merges stacks, marks pieces of a stack as used, writes player notes on instances.
 - Role checks are UX only (see `harness/core/03-obr-sdk-guide.md` §Roles and trust). In local mode the user is GM and can switch to a player view.
 
 ## Scripts
